@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="ecommpay_card" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Card payments</label>
+        <field id="ecommpay_card_active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+            <label>Enabled</label>
+            <comment><![CDATA[Before enabling the payment method please contact support@ecommpay.com]]></comment>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <config_path>payment/ecommpay_card/active</config_path>
+        </field>
+
+        <field id="ecommpay_card_title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+            <label>Title</label>
+            <comment><![CDATA[This controls the tittle which the user sees during checkout]]></comment>
+            <config_path>payment/ecommpay_card/title</config_path>
+        </field>
+
+        <!--<field id="ecommpay_card_show_description" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">-->
+        <!--    <label>Show descripton</label>-->
+        <!--    <comment><![CDATA[Display the payment method description which user sees during checkout]]></comment>-->
+        <!--    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>-->
+        <!--    <config_path>payment/ecommpay_card/show_description</config_path>-->
+        <!--</field>-->
+
+        <!--<field id="ecommpay_card_description" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">-->
+        <!--    <label>Description</label>-->
+        <!--    <comment><![CDATA[This controls the description which the user sees during checkout]]></comment>-->
+        <!--    <config_path>payment/ecommpay_card/description</config_path>-->
+        <!--    <depends>-->
+        <!--        <field id="ecommpay_card_show_description">1</field>-->
+        <!--    </depends>-->
+        <!--</field>-->
+
+        <field id="ecommpay_card_display_mode" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+            <label>Display mode</label>
+            <source_model>Ecommpay\Payments\Model\Config\DisplayMode</source_model>
+            <config_path>payment/ecommpay_card/display_mode</config_path>
+            <comment><![CDATA[Show payment page in popup instead of redirect]]></comment>
+        </field>
+
+        <field id="ecommpay_card_sort_order" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Sort Order</label>
+            <frontend_class>validate-number</frontend_class>
+            <config_path>payment/ecommpay_card/sort_order</config_path>
+        </field>
+
+        <field id="model"></field>
+    </group>
+</include>

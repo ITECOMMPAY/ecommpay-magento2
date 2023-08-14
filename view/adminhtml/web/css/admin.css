@@ -1,0 +1,244 @@
+/* Module configuration section  */
+.payment-flow-icon {
+    float: left;
+    margin-right: 1.5em;
+    margin-bottom: 1em;
+}
+.wallet-button select[multiple] {
+    height: 10em;
+}
+/* Other  */
+.ecommpay.payment-info td {
+    padding-right: 20px;
+    vertical-align: middle;
+}
+.ecommpay.payment-info td.result {
+    color: #666;
+    font-weight: bold;
+    opacity: 0.9;
+}
+.ecommpay.payment-info td.result.charge.authorized,
+.ecommpay.payment-info td.result.pass {
+    color: #4DAD52;
+}
+.ecommpay.payment-info td.result img {
+    display: none;
+}
+.ecommpay.payment-info td.result.pass img.passed {
+    display: inline-block;
+    width: 14px;
+    position: relative;
+    top: 1px;
+}
+.ecommpay.payment-info td.result.charge.issuer_declined,
+.ecommpay.payment-info td.result.charge.blocked,
+.ecommpay.payment-info td.result.charge.invalid,
+.ecommpay.payment-info td.result.fail {
+    color: #D8000C;
+}
+.ecommpay.payment-info td.result.fail img.failed {
+    display: inline-block;
+}
+.ecommpay.payment-info td.result.unchecked {
+    color: #9E9E9E;
+}
+.ecommpay.payment-info td.result.charge.manual_review,
+.ecommpay.payment-info td.result.radar.elevated {
+    color: orange;
+}
+.ecommpay.payment-info td.result {
+    font-weight: bold;
+}
+ul#payment_form_ecommpay_payments {
+    padding-left: 0;
+}
+
+.ecommpay-admin-config .heading {
+    background: url("../img/ecommpay_logo.svg") no-repeat 0 50% / 18rem auto;
+    padding-left: 20rem;
+    min-height: 75px;
+}
+.ecommpay-admin-config .button-container {float: right;}
+.ecommpay-admin-config.section-config.active > .admin__collapsible-block + input + fieldset { margin-left: 40px; }
+
+#ecommpay_payments_configuration_errors {
+    display: none;
+    padding: 0 1em 0.3em;
+    margin: 1em 0px;
+    border: 1px solid #D1D1D1;
+}
+
+/* Payment information block */
+.admin__page-section-item-content .ecommpay-payment-method {
+    float: right;
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.1em;
+    margin-right: 20px;
+}
+.admin__page-section-item-content .ecommpay-payment-method .ecommpay-payment-method-icon {
+    margin-top: -5px;
+    margin-right: 8px;
+    height: 28px;
+}
+.admin__page-section-item-content .ecommpay-payment-method .ecommpay-payment-method-icon {
+    margin-top: -5px;
+    margin-right: 8px;
+    height: 28px;
+}
+.admin__page-section-item-content .ecommpay-payment-status span,
+.admin__page-section-item-content .ecommpay-subscription-status span {
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-weight: 500;
+    margin-right: -7px;
+}
+.admin__page-section-item-content .ecommpay-subscription-status .ecommpay-subscription-status-canceled,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-refunded,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-partial_refund,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-canceled,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-unknown,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-uncaptured {
+    background-color: #e3e8ee;
+    color: #4f566b;
+}
+.admin__page-section-item-content .ecommpay-subscription-status .ecommpay-subscription-status-active,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-succeeded {
+    background-color: #cbf4c9;
+    color: #0e6245;
+}
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-pending {
+    background-color: #f9efa5;
+    color: #66640f;
+}
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-failed {
+    background-color: #fde2dd;
+    color: #cd3d64;
+}
+.admin__page-section-item-content .ecommpay-subscription-status .ecommpay-subscription-status-trialing {
+    background-color: rgb(214 236 255);
+    color: rgb(61 78 172);
+}
+.admin__page-section-item-content .ecommpay-payment-status span::after {
+    position: relative;
+    content: url('../img/icons/mask.svg');
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    fill: currentColor;
+    background-color: currentColor;
+}
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-pending::after,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-unknown::after,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-uncaptured::after {
+    -webkit-mask-image: url('../img/icons/time.svg');
+    mask-image: url('../img/icons/time.svg');
+}
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-succeeded::after {
+    -webkit-mask-image: url('../img/icons/check.svg');
+    mask-image: url('../img/icons/check.svg');
+}
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-refunded::after,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-canceled::after,
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-partial_refund::after {
+    -webkit-mask-image: url('../img/icons/return.svg');
+    mask-image: url('../img/icons/return.svg');
+}
+.admin__page-section-item-content .ecommpay-payment-status .ecommpay-payment-status-failed::after {
+    -webkit-mask-image: url('../img/icons/cross.svg');
+    mask-image: url('../img/icons/cross.svg');
+}
+.ecommpay-payment-risk-score {
+    border-radius: 13px;
+    height: 26px;
+    width: 26px;
+    display: inline-block;
+    margin-right: 5px;
+    position: relative;
+    top: -2px;
+    text-align: center;
+}
+.ecommpay-payment-risk-score .score-value {
+    display: inline-block;
+    position: relative;
+    top: 2px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.ecommpay-payment-risk-normal .ecommpay-payment-risk-score {
+    background-color: #cbf4c9;
+    color: #0e6245;
+}
+.ecommpay-payment-risk-elevated .ecommpay-payment-risk-score {
+    background-color: #f9efa5;
+    color: #d97917;
+}
+.ecommpay-payment-risk-highest .ecommpay-payment-risk-score {
+    background-color: #fde2dd;
+    color: #cd3d64;
+}
+
+/* Admin page card element */
+.admin__fieldset #ecommpay-card-element {
+    margin: 1.5em 0 1.5em 0;
+    border: 1px solid #adadad;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Saved payment methods */
+.ecommpay-saved-payment-methods img.payment-method-icon {
+    max-height: 32px;
+    float: right;
+    top: -2px;
+    position: relative;
+}
+.ecommpay-saved-payment-methods a.action-add {
+    float: right;
+}
+.ecommpay-saved-payment-methods {
+    margin-bottom: 2em;
+}
+.ecommpay-saved-payment-methods .saved-payment-method-option {
+    line-height: 32px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    width: 100%;
+}
+.ecommpay-saved-payment-methods .saved-payment-method-option label {
+    line-height: 32px;
+    cursor: pointer;
+    margin-left: 10px;
+    width: 100%;
+}
+.ecommpay-saved-payment-methods .ecommpay.mage-error {
+    margin-top: 1.2em;
+}
+
+/* Product Configuration */
+.admin__field-control input[name="product[ecommpay_sub_interval_count]"].admin__control-text,
+.admin__field-control input[name="product[ecommpay_sub_trial]"].admin__control-text,
+.admin__field-control input[name="product[ecommpay_sub_initial_fee]"].admin__control-text {
+    width: 150px;
+}
+
+/* Cart Price Rules */
+#ecommpay_subscriptions_coupon_months {
+    width: 164px;
+}
+
+.ecommpay-expand {
+    border-bottom: 0;
+}
+.ecommpay-expand > fieldset {
+    display: block !important;
+}
+.ecommpay-expand.active > fieldset {
+    display: none !important;
+}
+
+/* Product Edit page  */
+body.catalog-product-edit div[data-index="ecommpay_sub_initial_fee"] + div[data-index="ecommpay_sub_ud"] {
+    display: none; /* Upgrades and downgrades are not yet supported on simple and virtual products */
+}

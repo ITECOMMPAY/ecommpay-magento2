@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @var \Ecommpay\Payments\Block\EndPayment $block
+ */
+
+echo $block->getOrderMessage();
+
+if ($block->getOrderLink()) {
+    echo "<div class='panel panel-default'>";
+        echo sprintf('<a href="%s">%s</a>', $block->getOrderLink(), 'Go to order');
+    echo "</div>";
+}

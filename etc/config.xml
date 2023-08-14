@@ -1,0 +1,120 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <ecommpay_general>
+                <active>1</active>
+                <project_id></project_id>
+                <salt></salt>
+                <testmode>0</testmode>
+                <title>General Settings</title>
+                <payment_action>true</payment_action>
+                <sort_order>1</sort_order>
+                <pp_language>default</pp_language>
+                <additional_parameters></additional_parameters>
+            </ecommpay_general>
+            <ecommpay_card>
+                <active>1</active>
+                <title>Card</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <display_mode>redirect</display_mode>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodCard</model>
+                <sort_order>2</sort_order>
+            </ecommpay_card>
+            <ecommpay_applepay>
+                <active>0</active>
+                <title>Applepay</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodApplepay</model>
+                <sort_order>3</sort_order>
+            </ecommpay_applepay>
+            <ecommpay_googlepay>
+                <active>0</active>
+                <title>Googlepay</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodGooglepay</model>
+                <sort_order>4</sort_order>
+            </ecommpay_googlepay>
+            <ecommpay_open_banking>
+                <active>0</active>
+                <title>Open Banking</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodOpenBanking</model>
+                <sort_order>5</sort_order>
+            </ecommpay_open_banking>
+            <ecommpay_paypal>
+                <active>0</active>
+                <title>Pay Pal</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodPaypal</model>
+                <sort_order>6</sort_order>
+            </ecommpay_paypal>
+            <ecommpay_sofort>
+                <active>0</active>
+                <title>Sofort</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodSofort</model>
+                <sort_order>7</sort_order>
+            </ecommpay_sofort>
+            <ecommpay_ideal>
+                <active>0</active>
+                <title>iDEAL</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodIdeal</model>
+                <sort_order>8</sort_order>
+            </ecommpay_ideal>
+            <ecommpay_klarna>
+                <active>0</active>
+                <title>Klarna</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodKlarna</model>
+                <sort_order>9</sort_order>
+            </ecommpay_klarna>
+            <ecommpay_blik>
+                <active>0</active>
+                <title>Blik</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodBlik</model>
+                <sort_order>10</sort_order>
+            </ecommpay_blik>
+            <ecommpay_giropay>
+                <active>0</active>
+                <title>Giropay</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodGiropay</model>
+                <sort_order>11</sort_order>
+            </ecommpay_giropay>
+            <ecommpay_more_methods>
+                <active>0</active>
+                <title>More payment methods</title>
+                <show_description>0</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <force_payment_method></force_payment_method>
+                <model>Ecommpay\Payments\Model\MethodMoreMethods</model>
+                <sort_order>12</sort_order>
+            </ecommpay_more_methods>
+        </payment>
+    </default>
+</config>

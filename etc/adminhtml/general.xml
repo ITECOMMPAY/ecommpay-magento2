@@ -1,0 +1,61 @@
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="ecommpay_general" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>General settings</label>
+        <!--<field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1"-->
+        <!--       showInStore="0" canRestore="1">-->
+        <!--    <label>Enabled</label>-->
+        <!--    <comment><![CDATA[Enable the plugin]]></comment>-->
+        <!--    <config_path>payment/ecommpay_general/active</config_path>-->
+        <!--    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>-->
+        <!--</field>-->
+
+        <field id="ecommpay_project_id" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
+               showInStore="1">
+            <label>Project ID</label>
+            <comment><![CDATA[Your project ID you could get from ECOMMPAY helpdesk. Leave it blank if test mode]]></comment>
+            <config_path>payment/ecommpay_general/project_id</config_path>
+            <depends>
+                <field id="ecommpay_testmode">0</field>
+            </depends>
+            <frontend_class>validate-number</frontend_class>
+        </field>
+
+        <field id="ecommpay_salt" translate="label" type="obscure" sortOrder="3" showInDefault="1" showInWebsite="1"
+               showInStore="1">
+            <label>Secret key</label>
+            <comment>
+                <![CDATA[Secret key which is using to sign payment request. You could get it from ECOMMPAY helpdesk]]>
+            </comment>
+            <config_path>payment/ecommpay_general/salt</config_path>
+            <depends>
+                <field id="ecommpay_testmode">0</field>
+            </depends>
+            <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+        </field>
+
+        <field id="ecommpay_testmode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1"
+               showInStore="1">
+            <label>Demo mode</label>
+            <comment><![CDATA[By enabling this mode, you can proceed with the payment process without utilizing your own project ID. Once you obtain your production and stage project IDs, kindly uncheck this box.]]></comment>
+            <config_path>payment/ecommpay_general/testmode</config_path>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+        </field>
+
+        <field id="ecommpay_language" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1"
+               showInStore="1">
+            <label>Language</label>
+            <comment><![CDATA[Payment page language]]></comment>
+            <config_path>payment/ecommpay_general/pp_language</config_path>
+            <source_model>Ecommpay\Payments\Model\Config\Language</source_model>
+        </field>
+
+        <field id="ecommpay_additional_parameters" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1"
+               showInStore="1">
+            <label>Additional parameters</label>
+            <comment><![CDATA[It will be added to redirect link to ECommPay payment page]]></comment>
+            <config_path>payment/ecommpay_general/additional_parameters</config_path>
+        </field>
+
+    </group>
+</include>

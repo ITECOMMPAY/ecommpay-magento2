@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment" translate="label" type="text" sortOrder="400" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="ecommpay" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Ecommpay</label>
+                <comment><![CDATA[Accept payments with a complete payment platform for your business.]]></comment>
+                <fieldset_css>complex ecommpay-admin-config</fieldset_css>
+                <frontend_model>Ecommpay\Payments\Block\Adminhtml\Config\Fieldset</frontend_model>
+                <attribute type="displayIn">recommended_solutions</attribute>
+
+                <include path="Ecommpay_Payments::general.xml"/>
+                <include path="Ecommpay_Payments::card.xml"/>
+                <include path="Ecommpay_Payments::alternative.xml"/>
+
+            </group>
+        </section>
+    </system>
+</config>
