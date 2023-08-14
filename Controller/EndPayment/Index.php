@@ -2,11 +2,13 @@
 
 namespace Ecommpay\Payments\Controller\EndPayment;
 
+use Ecommpay\Payments\Common\CallbackInfoManager;
+use Ecommpay\Payments\Common\EcpCallbackDTO;
 use Ecommpay\Payments\Common\EcpConfigHelper;
-use Ecommpay\Payments\Common\EcpOperationException;
-use Ecommpay\Payments\Common\EcpOrderIdFormatter;
 use Ecommpay\Payments\Common\EcpRefundProcessor;
+use Ecommpay\Payments\Common\EcpRefundResult;
 use Ecommpay\Payments\Common\EcpSigner;
+use Ecommpay\Payments\Common\OrderPaymentManager;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\CsrfAwareActionInterface;
@@ -23,45 +25,35 @@ use Magento\Sales\Model\Order\Creditmemo;
 
 class Index extends Action implements CsrfAwareActionInterface
 {
-    /**
-     * @var OrderRepositoryInterface
-     */
+    /** @var OrderRepositoryInterface */
     protected $orderRepository;
 
-    /**
-     * @var InvoiceService
-     */
+    /** @var InvoiceService */
     protected $invoiceService;
 
-    /**
-     * @var CreditmemoRepositoryInterface
-     */
+    /** @var CreditmemoRepositoryInterface */
     protected $creditmemoRepository;
 
-    /**
-     * @var EcpSigner
-     */
+    /** @var EcpSigner */
     protected $signer;
 
-    /**
-     * @var PageFactory
-     */
+    /** @var PageFactory */
     protected $pageFactory;
 
-    /**
-     * @var string|null
-     */
+    /** @var string|null */
     protected $currentOrderLink;
 
-    /**
-     * @var EcpConfigHelper
-     */
+    /** @var EcpConfigHelper */
     protected $configHelper;
 
-    /**
-     * @var JsonFactory
-     */
+    /** @var JsonFactory */
     protected $resultJsonFactory;
+
+    /** @var CallbackInfoManager */
+    protected $callbackInfoManager;
+
+    /** @var OrderPaymentManager */
+    protected $orderPaymentManager;
 
     /**
      * @param Context $context
@@ -88,6 +80,8 @@ class Index extends Action implements CsrfAwareActionInterface
         $this->resultJsonFactory = $resultJsonFactory;
         $this->configHelper = EcpConfigHelper::getInstance();
         $this->signer = new EcpSigner();
+        $this->callbackInfoManager = new CallbackInfoManager();
+        $this->orderPaymentManager = new OrderPaymentManager();
     }
 
     public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
@@ -104,48 +98,34 @@ class Index extends Action implements CsrfAwareActionInterface
     {
         $body = file_get_contents('php://input');
 
-        $configIsTest = $this->configHelper->isTestMode();
-
-        if (!empty($body)) {
-            $this->processRefundCallback($body);
-        }
-
-        $resultPage = $this->pageFactory->create();
-        $resultPage->getLayout()->initMessages();
-
-        if ($configIsTest && $this->getRequest()->getParam('test')) {
-            return $this->checkTestOrder($resultPage);
-        }
-
-        if ($this->getRequest()->getParam('on_success')) {
-            $message = __('Your payment is being processed by ecommpay');
-
-            $orderId = $this->getRequest()->getParam('order_id');
-            list($order, $_) = $this->getOrder($orderId);
-            if ($order && $order->getStatus() === \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW) {
-                $message = __('Payment successfully processed by ecommpay');
-            }
-
-            $resultPage->getLayout()->getBlock('endpayment')->setOrderMessage($message);
-            $resultPage->getLayout()->getBlock('endpayment')->setOrderLink($this->currentOrderLink);
-            return $resultPage;
-        }
-
-        return $this->checkRealOrder($resultPage, $body);
-    }
-
-    protected function processRefundCallback($data)
-    {
-        $refundProcessor = new EcpRefundProcessor();
-
         try {
-            $ecpCallbackResult = $refundProcessor->processCallback($data);
-        } catch (EcpOperationException $ex) {
-            return; // not a refund operation, go back to order confirmation
+            $callbackDto = EcpCallbackDTO::create($body);
+            if (!$this->signer->checkSignature($callbackDto->getCallbackArray())) {
+                throw new \Exception('Wrong callback data signature.');
+            }
         } catch (\Exception $e) {
             http_response_code(400);
             die($e->getMessage());
         }
+
+        $orderId = $this->orderPaymentManager->getOrderIdByPaymentId($callbackDto->getPaymentId());
+        $callbackDto->setOrderId($orderId);
+        if ($callbackDto->isSale()) {
+            return $this->processSaleCallback($callbackDto);
+        }
+        if ($callbackDto->isRefundCallback()) {
+            $this->processRefundCallback($callbackDto);
+        }
+    }
+
+    protected function processRefundCallback(EcpCallbackDTO $callbackDto)
+    {
+        $ecpCallbackResult = new EcpRefundResult(
+            $callbackDto->getOrderId(),
+            $callbackDto->getRequestId(),
+            $callbackDto->getOperationStatus(),
+            $callbackDto->getMessage()
+        );
 
         $resource = $this->_objectManager->get('Magento\Framework\App\ResourceConnection');
         /** @var \Magento\Framework\App\ResourceConnection $resource */
@@ -178,14 +158,13 @@ class Index extends Action implements CsrfAwareActionInterface
 
         $now = new \DateTime();
         $refundId = $cm->getId();
-        if ($ecpCallbackResult->isSuccess()) {
+        if (in_array($callbackDto->getPaymentStatus(), ['reversed', 'refunded', 'partially reversed', 'partially refunded'])) {
             $cm->setState(Creditmemo::STATE_REFUNDED);
             $cm->addComment('Money-back request #' . $refundId . ' was successfully processed at ' . $now->format('d.m.Y H:i:s'));
-            $order->setStatus(EcpRefundProcessor::ORDER_STATUS_PARTIAL_REFUND)->save();
-            if (in_array(json_decode($data, true)['payment']['status'], ['reversed', 'refunded'])) {
-                $order->setStatus(EcpRefundProcessor::ORDER_STATUS_FULL_REFUND)->save();
+            if (in_array($callbackDto->getPaymentStatus(), ['reversed', 'refunded'])) {
+                $order->setStatus(\Magento\Sales\Model\Order::STATE_CLOSED)->save();
             } else {
-                $order->setStatus(EcpRefundProcessor::ORDER_STATUS_PARTIAL_REFUND)->save();
+                $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING)->save();
             }
         } else {
             $cm->setState(Creditmemo::STATE_CANCELED);
@@ -202,86 +181,6 @@ class Index extends Action implements CsrfAwareActionInterface
         die();
     }
 
-    protected function checkTestOrder($resultPage) {
-        $orderId = $this->getRequest()->getParam('order_id');
-        $paymentStatus = $this->getRequest()->getParam('status');
-
-        list ($order, $message) = $this->getOrder($orderId);
-        if (!$order) {
-            $resultPage->getLayout()->getBlock('endpayment')->setOrderMessage($message);
-            return $resultPage;
-        }
-
-        $message = __('Payment failed to be processed by ecommpay');
-
-        if ($paymentStatus === 'success') {
-            $message = __('Payment successfully processed by ecommpay');
-            $paymentId = time();
-            $this->updateOrderStatus($order, $message, $paymentId);
-        }
-
-        $resultPage->getLayout()->getBlock('endpayment')->setOrderMessage($message);
-        $resultPage->getLayout()->getBlock('endpayment')->setOrderLink($this->currentOrderLink);
-        return $resultPage;
-    }
-
-    protected function checkRealOrder($resultPage, $body)
-    {
-        $bodyData = json_decode($body, true);
-
-        $message = __('Signature failed verification');
-        if (is_array($bodyData) && $this->signer->checkSignature($bodyData)) {
-            $orderId = $bodyData['payment']['id'];
-            $orderId = EcpOrderIdFormatter::removeOrderPrefix($orderId, EcpConfigHelper::CMS_PREFIX);
-
-            $paymentStatus = $bodyData['payment']['status'];
-
-            list ($order, $message) = $this->getOrder($orderId);
-            if (!$order) {
-                $resultPage->getLayout()->getBlock('endpayment')->setOrderMessage($message);
-                return $resultPage;
-            }
-
-            $message = __('Payment failed to be processed by ecommpay');
-
-            if ($paymentStatus === 'success') {
-                $paymentId = $bodyData['operation']['id'];
-
-                $message = __('Payment successfully processed by ecommpay');
-                $this->updateOrderStatus($order, $message, $paymentId);
-            } else {
-                $order->addStatusToHistory($order->getStatus(), $message);
-                $order->save();
-            }
-        }
-        $resultPage->getLayout()->getBlock('endpayment')->setOrderMessage($message);
-        return $resultPage;
-    }
-
-    /**
-     * @param $orderId
-     * @return array
-     */
-    protected function getOrder($orderId)
-    {
-        $message = '';
-        $order = null;
-
-        try {
-            $order = $this->orderRepository->get($orderId);
-
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $customerSession = $objectManager->get('Magento\Customer\Model\Session');
-            if($customerSession->isLoggedIn()) {
-                $this->currentOrderLink = '/sales/order/view/order_id/' . $orderId . '/';
-            }
-        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
-            $message = __('Order does not exist');
-        } catch (\Magento\Framework\Exception\InputException $e) {
-            $message = __('Order does not exist, no order_id is provided');
-        }
-        return [$order, $message];
-    }
 
     /**
      * @param Order $order
@@ -290,25 +189,75 @@ class Index extends Action implements CsrfAwareActionInterface
      * @throws \Exception
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function updateOrderStatus($order, $message, $paymentId)
+    protected function updateOrderStatus($order, $message, $operationId)
     {
         $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
         $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
         $order->addStatusToHistory($order->getStatus(), $message);
-        //$order->save();
 
         $invoice = $this->invoiceService->prepareInvoice($order);
         $invoice->register();
-        $invoice->setTransactionId($paymentId);
+        $invoice->setTransactionId($operationId);
         $invoice->setState(\Magento\Sales\Model\Order\Invoice::STATE_PAID);
         $invoice->save();
 
         /** @var Order\Payment $payment */
         $payment = $order->getPayment();
         $payment->pay($invoice);
-
         $order->setTotalPaid($order->getTotalPaid() + $payment->getAmountPaid());
         $order->setBaseTotalPaid($order->getBaseTotalPaid() + $payment->getAmountPaid());
+
         $order->save();
+    }
+
+    protected function processSaleCallback(EcpCallbackDTO $callbackDto)
+    {
+        $orderId = $callbackDto->getOrderId();
+
+        try {
+            $order = $this->orderRepository->get($orderId);
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+            http_response_code(200);
+            die('Order does not exist');
+        } catch (\Magento\Framework\Exception\InputException $e) {
+            http_response_code(200);
+            die('Order does not exist, no order_id is provided');
+        }
+
+        switch ($callbackDto->getPaymentStatus()) {
+            case 'decline':
+                $order->setState(\Magento\Sales\Model\Order::STATE_CANCELED);
+                $order->setStatus(\Magento\Sales\Model\Order::STATE_CANCELED);
+                $message = __('Operation ' . $callbackDto->getOperationType() .
+                    ' decline by ecommpay. Reason: ' . $callbackDto->getMessage());
+                $order->addStatusToHistory($order->getStatus(), $message);
+                break;
+            case 'success':
+                $message = __('Payment successfully processed by ecommpay');
+                $this->updateOrderStatus($order, $message, $callbackDto->getOperationId());
+                break;
+            case 'external error':
+            case 'internal error':
+            case 'awaiting customer':
+            case 'expired':
+                $message = __('Operation ' . $callbackDto->getOperationType() .
+                    ' failed to be processed by ecommpay. Reason: ' . $callbackDto->getMessage());
+                $order->addStatusToHistory($order->getStatus(), $message);
+                break;
+        }
+        $order->save();
+
+        $callbackInfoManager = new CallbackInfoManager();
+        $callbackInfoManager->insert(
+            $orderId,
+            $callbackDto->getOperationType(),
+            $callbackDto->getPaymentId(),
+            $callbackDto->getPaymentMethod(),
+            $callbackDto->getPaymentStatus(),
+            $callbackDto->getMessage(),
+            $callbackDto->getOperationId()
+        );
+        http_response_code(200);
+        die('OK');
     }
 }

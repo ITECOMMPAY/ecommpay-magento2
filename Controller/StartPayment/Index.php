@@ -59,18 +59,11 @@ class Index extends Action
         $order->addStatusToHistory($order->getStatus(), 'Order pending payment by ecommpay');
         $order->save();
 
-        $redirectUrl = $this->requestBuilder->getOrderRedirectUrl($order);
+        $paymentPageParams = $this->requestBuilder->getPaymentPageParams($order);
 
-        if ($this->request->isAjax()) {
-            return $this->resultJsonFactory->create()->setData([
-                'success' => true,
-                'cardRedirectUrl' => $redirectUrl
-            ]);
-        }
-
-        /** @var \Magento\Framework\Controller\Result\Redirect $resultRedirect */
-        $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl($redirectUrl);
-        return $resultRedirect;
+        return $this->resultJsonFactory->create()->setData([
+            'success' => true,
+            'paymentPageParams' => $paymentPageParams
+        ]);
     }
 }

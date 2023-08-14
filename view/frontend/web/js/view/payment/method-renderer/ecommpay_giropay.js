@@ -11,6 +11,48 @@ define(
     ) {
         'use strict';
 
+        function redirect(paymentPageParams) {
+            var url = paymentPageParams.paymentPageUrl;
+            delete paymentPageParams.paymentPageUrl;
+            let form =
+                $('<form/>', {
+                    method: 'post',
+                    action: url,
+                    style: {
+                        display: 'none',
+                    }
+                });
+
+            $.each(paymentPageParams, function (key, value) {
+                form.append($('<input/>', {
+                    type: 'hidden',
+                    name: key,
+                    value: value
+                }));
+            });
+
+            $(form).appendTo('body').submit();
+        }
+
+        function initPaymentPage() {
+            var endpoint = urlBuilder.build('ecommpay/startpayment/index?method=giropay');
+            jQuery.ajax({
+                method: 'POST',
+                url: endpoint,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        redirect(response.paymentPageParams);
+                        return;
+                    }
+                    alert(response.error);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert(textStatus);
+                }
+            })
+        }
+
         return Component.extend({
             defaults: {
                 template: 'Ecommpay_Payments/payment/ecommpay_common',
@@ -18,13 +60,11 @@ define(
             },
 
             afterPlaceOrder: function () {
-                var url = urlBuilder.build('ecommpay/startpayment/index?method=giropay');
-                console.log('Redirect after place order:', url);
-                window.location.replace(url);
+                initPaymentPage();
             },
 
             getDescription: function() {
-                return window.checkoutConfig.ecommpay_settings.description;
+                return window.checkoutConfig.ecommpay_settings.descriptions.ecommpay_giropay;
             }
         });
     }

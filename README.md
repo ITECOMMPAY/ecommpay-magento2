@@ -64,6 +64,7 @@ General:
 1. Magento >= 2.2
 
 ### Changelog
-
+#### 1.1.0
+* New Payment Page Display mode added it is called “Embedded mode". This mode makes the process of paying even smoother by putting the payment page right on the checkout page. Users no longer need to be redirected to a different page to complete their card payments.
 #### 1.0.0
 * First release.

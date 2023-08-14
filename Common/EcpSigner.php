@@ -51,9 +51,9 @@ class EcpSigner
      * @param array $data
      * @return string
      */
-    public function getSignature(array $data)
+    public function getSignature(array $data, array $ignoredParams = [])
     {
-        $paramsToSign = $this->getParamsToSign($data);
+        $paramsToSign = $this->getParamsToSign($data, $ignoredParams);
         $stringToSign = $this->getStringToSign($paramsToSign);
         $secretKey = EcpConfigHelper::getInstance()->getSecretKeyDecrypted();
         return base64_encode(hash_hmac('sha512', $stringToSign, $secretKey, true));

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="ecp_order_payment" resource="default" engine="innodb" comment="Associations between Magento order IDs to Ecommpay payment IDs">
+        <column name="id" xsi:type="int" identity="true" unsigned="true" nullable="false" comment="Entity ID" />
+        <column name="order_id" xsi:type="int" unsigned="true" nullable="false" comment="Magento order entity ID" />
+        <column name="payment_id" xsi:type="varchar" length="64" nullable="false" comment="Ecommpay payment ID" />
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ECP_ORDER_PAYMENT_ORDER_ID"
+                    table="ecp_order_payment" column="order_id" referenceTable="sales_order"
+                    referenceColumn="entity_id" onDelete="NO ACTION"/>
+        <index referenceId="ECOMMPAY_PAYMENT_ID_INDEX" indexType="btree">
+            <column name="payment_id"/>
+        </index>
+    </table>
+    <table name="ecp_callback_info" resource="default" engine="innodb" comment="Store Ecommpay callback info">
+        <column name="id" xsi:type="int" identity="true" unsigned="true" nullable="false" comment="Entity ID" />
+        <column name="order_id" xsi:type="int" unsigned="true" nullable="false" comment="Magento order entity ID" />
+        <column name="operation_type" xsi:type="varchar" length="36" nullable="false" comment="Operation type" />
+        <column name="payment_id" xsi:type="varchar" length="36" nullable="false" comment="Payment ID" />
+        <column name="operation_id" xsi:type="varchar" length="64" nullable="false" comment="Ecp Operation ID" />
+        <column name="payment_method" xsi:type="varchar" length="64" nullable="false" comment="Payment method" />
+        <column name="payment_status" xsi:type="varchar" length="64" nullable="false" comment="Payment status" />
+        <column name="callback_message" xsi:type="varchar" length="256" nullable="false" comment="Callback message" />
+        <column name="datetime" xsi:type="datetime"  on_update="false" nullable="true" default="CURRENT_TIMESTAMP" comment="DateTime" />
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ECP_CALLBACK_INFO_ORDER_ID"
+                    table="ecp_callback_info" column="order_id" referenceTable="sales_order"
+                    referenceColumn="entity_id" onDelete="NO ACTION"/>
+    </table>
+</schema>

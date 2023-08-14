@@ -4,7 +4,7 @@
     <default>
         <payment>
             <ecommpay_general>
-                <active>1</active>
+                <enable_plugin>0</enable_plugin>
                 <project_id></project_id>
                 <salt></salt>
                 <testmode>0</testmode>
@@ -15,47 +15,47 @@
                 <additional_parameters></additional_parameters>
             </ecommpay_general>
             <ecommpay_card>
-                <active>1</active>
-                <title>Card</title>
+                <active>0</active>
+                <title>Card payments</title>
                 <show_description>0</show_description>
                 <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
-                <display_mode>redirect</display_mode>
+                <display_mode>embedded</display_mode>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodCard</model>
                 <sort_order>2</sort_order>
             </ecommpay_card>
             <ecommpay_applepay>
                 <active>0</active>
-                <title>Applepay</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <title>ApplePay</title>
+                <show_description>1</show_description>
+                <description>Pay with ApplePay</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodApplepay</model>
                 <sort_order>3</sort_order>
             </ecommpay_applepay>
             <ecommpay_googlepay>
                 <active>0</active>
-                <title>Googlepay</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <title>GooglePay</title>
+                <show_description>1</show_description>
+                <description>Pay with GooglePay.</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodGooglepay</model>
                 <sort_order>4</sort_order>
             </ecommpay_googlepay>
             <ecommpay_open_banking>
                 <active>0</active>
-                <title>Open Banking</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <title>Pay by bank</title>
+                <show_description>1</show_description>
+                <description>You will be redirected to your bank.</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodOpenBanking</model>
                 <sort_order>5</sort_order>
             </ecommpay_open_banking>
             <ecommpay_paypal>
                 <active>0</active>
-                <title>Pay Pal</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <title>PayPal</title>
+                <show_description>1</show_description>
+                <description>You will be redirected to PayPal.</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodPaypal</model>
                 <sort_order>6</sort_order>
@@ -63,8 +63,8 @@
             <ecommpay_sofort>
                 <active>0</active>
                 <title>Sofort</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <show_description>1</show_description>
+                <description>You will be redirected to your bank.</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodSofort</model>
                 <sort_order>7</sort_order>
@@ -72,8 +72,8 @@
             <ecommpay_ideal>
                 <active>0</active>
                 <title>iDEAL</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <show_description>1</show_description>
+                <description>You will be redirected to iDEAL.</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodIdeal</model>
                 <sort_order>8</sort_order>
@@ -81,8 +81,8 @@
             <ecommpay_klarna>
                 <active>0</active>
                 <title>Klarna</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <show_description>1</show_description>
+                <description>You will be redirected to Klarna.</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodKlarna</model>
                 <sort_order>9</sort_order>
@@ -90,8 +90,8 @@
             <ecommpay_blik>
                 <active>0</active>
                 <title>Blik</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <show_description>1</show_description>
+                <description>You will be redirected to finish your Blik payment.</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodBlik</model>
                 <sort_order>10</sort_order>
@@ -99,8 +99,8 @@
             <ecommpay_giropay>
                 <active>0</active>
                 <title>Giropay</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <show_description>1</show_description>
+                <description>You will be redirected to Giropay.</description>
                 <payment_action>true</payment_action>
                 <model>Ecommpay\Payments\Model\MethodGiropay</model>
                 <sort_order>11</sort_order>
@@ -108,8 +108,8 @@
             <ecommpay_more_methods>
                 <active>0</active>
                 <title>More payment methods</title>
-                <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <show_description>1</show_description>
+                <description>Payment form with additional payment methods.</description>
                 <payment_action>true</payment_action>
                 <force_payment_method></force_payment_method>
                 <model>Ecommpay\Payments\Model\MethodMoreMethods</model>

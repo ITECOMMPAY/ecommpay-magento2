@@ -20,17 +20,19 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getConfig()
     {
+        $pluginEnabled = $this->configHelper->getPluginEnabled();
         $isTest = $this->configHelper->isTestMode();
         $displayMode = $this->configHelper->getDisplayMode();
-        $description = null; //$this->scopeConfig->getValue(self::XML_DESCRIPTION, $storeScope);
         $paymentPageHost = $this->configHelper->getPPHost();
         $paymentPageProtocol = $this->configHelper->getProtocol();
+        $descriptions = $this->configHelper->getDescriptions();
         $merchantScriptIsLoaded = false;
         return [
             'ecommpay_settings' => compact(
+                'pluginEnabled',
                 'isTest',
                 'displayMode',
-                'description',
+                'descriptions',
                 'paymentPageHost',
                 'paymentPageProtocol',
                 'merchantScriptIsLoaded'

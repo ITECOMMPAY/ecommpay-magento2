@@ -1,7 +1,11 @@
-<div>
-<!--    <h1><?php
-        /** @var Ecommpay\Payments\Block\Adminhtml\Order\OrderView $block */
-        echo $block->testFunction()?> </h1>
-    <h3>Payment Info 1</h3>
-    <h3>Payment Info 1</h3>-->
+<div style="margin-top: 20px">
+<div style="font-size: 16px"><p><b>Ecommpay payment</b></p></div>
+<?php
+    /** @var Ecommpay\Payments\Block\Adminhtml\Order\OrderView $block */
+    $block->loadOrderData();
+    echo '<p><b>Operation type:</b> ' . $block->getOperationType() . '</p>';
+    echo '<p><b>Payment ID:</b> ' . $block->getPaymentId() . '</p>';
+    echo '<p><b>Payment method:</b> ' . $block->getPaymentMethod() . '</p>';
+    echo '<p><b>Payment status:</b> ' . $block->getPaymentStatus() . '</p>';
+?>
 </div>

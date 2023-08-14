@@ -4,6 +4,8 @@ namespace Ecommpay\Payments\Common;
 
 class RequestBuilder
 {
+    const SUCCESS_URL = 'checkout/onepage/success';
+    const FAIL_URL = 'checkout/onepage/failure';
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
@@ -50,23 +52,25 @@ class RequestBuilder
     /**
      * @return string
      */
-    public function getOrderRedirectUrl(\Magento\Sales\Model\Order $order)
+    public function getPaymentPageParams(\Magento\Sales\Model\Order $order)
     {
-        $successUrl = $this->urlBuilder->getUrl('checkout/onepage/success');
-        $failUrl = $this->urlBuilder->getUrl('checkout/onepage/failure');
-        $merchantCallbackUrl = $this->configHelper->getMerchantCallbackUrl();
-        $urlData = $this->createUrlData($order, $successUrl, $failUrl, $merchantCallbackUrl);
-        $urlData = $this->appendPaymentMethod($urlData, $order);
+        $orderPaymentManager = new OrderPaymentManager();
+        $paymentId = uniqid(EcpConfigHelper::CMS_PREFIX);
+        if ($this->configHelper->isTestMode()) {
+            $paymentId = EcpPaymentIdFormatter::addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
+        }
+        $orderPaymentManager->insert($order->getEntityId(),$paymentId);
+        $paymentPageParams = $this->buildParams($order, $paymentId);
+        $paymentPageParams = $this->appendPaymentMethod($paymentPageParams, $order);
 
-        $urlData['signature'] = $this->signer->getSignature($urlData);
-        $urlArgs = http_build_query($urlData, '', '&');
+        $paymentPageParams['signature'] = $this->signer->getSignature($paymentPageParams);
 
-        return sprintf(
-            '%s://%s/payment?%s',
+        $paymentPageParams['paymentPageUrl'] = sprintf(
+            '%s://%s/payment',
             $this->configHelper->getProtocol(),
-            $this->configHelper->getPPHost(),
-            $urlArgs
+            $this->configHelper->getPPHost()
         );
+        return $paymentPageParams;
     }
 
     /**
@@ -75,30 +79,20 @@ class RequestBuilder
      * @param $failUrl
      * @return array
      */
-    protected function createUrlData(
-        \Magento\Sales\Model\Order $order,
-                                   $successUrl,
-                                   $failUrl,
-                                   $merchantCallbackUrl
-    )
+    protected function buildParams(\Magento\Sales\Model\Order $order, $paymentId)
     {
-        $payment_id = $order->getId();
-        if ($this->configHelper->isTestMode()) {
-            $payment_id = EcpOrderIdFormatter::addOrderPrefix($payment_id, EcpConfigHelper::CMS_PREFIX);
-        }
-
         $currencyCode = $order->getOrderCurrencyCode();
         $paymentAmount = EcpConfigHelper::priceMultiplyByCurrencyCode($order->getTotalDue(), $currencyCode);
         $result = [
             'project_id' => $this->configHelper->getProjectId(),
             'payment_amount' => $paymentAmount,
-            'payment_id' => $payment_id,
+            'payment_id' => $paymentId,
             'payment_currency' => $currencyCode,
-            'merchant_success_url' => $successUrl,
+            'merchant_success_url' => $this->urlBuilder->getUrl(self::SUCCESS_URL),
             'merchant_success_enabled' => 2,
-            'merchant_fail_url' => $failUrl,
+            'merchant_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
             'merchant_fail_enabled' => 2,
-            'merchant_callback_url' => $merchantCallbackUrl,
+            'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
             'interface_type' => json_encode($this->configHelper->getInterfaceTypeId()),
             'customer_email' => $order->getBillingAddress()->getEmail(),
             'customer_first_name' => $order->getBillingAddress()->getFirstname(),
@@ -126,6 +120,12 @@ class RequestBuilder
         if ($order->getCustomerId()) {
             $result['customer_id'] = $order->getCustomerId();
         }
+        if(empty($result['avs_street_address']) || empty($result['avs_post_code'])) {
+            $result['avs_street_address'] = null; //initialize both keys if not exists
+            $result['avs_street_address'] = null;
+            unset($result['avs_street_address']);
+            unset($result['avs_street_address']);
+        }
         $additionalParams = $this->configHelper->getAdditionalParameters();
         if (!empty($additionalParams)) {
                 $additionalData = [];
@@ -136,7 +136,7 @@ class RequestBuilder
         return $result;
     }
 
-    private function get_receipt_data(\Magento\Sales\Model\Order $order)
+    private function getReceiptData(\Magento\Sales\Model\Order $order)
     {
         $items = $order->getItems();
         $currency = $order->getOrderCurrency();
@@ -148,28 +148,28 @@ class RequestBuilder
         $receipt = $totalTax > 0
             ? [
                 // Item positions.
-                'positions' => $this->get_positions($items, $currency),
+                'positions' => $this->getPositions($items, $currency),
                 // Total tax amount per payment.
                 'total_tax_amount' => $totalTax,
                 'common_tax' => round($totalTax * 100 / $total, 2),
             ]
             : [
                 // Item positions.
-                'positions' => $this->get_positions($items, $currency)
+                'positions' => $this->getPositions($items, $currency)
             ];
         return base64_encode(json_encode($receipt));
     }
 
-    private function get_positions($items, $currency)
+    private function getPositions($items, $currency)
     {
         $positions = [];
         foreach ($items as $item) {
-            $positions[] = $this->get_receipt_position($item, $currency);
+            $positions[] = $this->getReceiptPosition($item, $currency);
         }
         return $positions;
     }
 
-    private function get_receipt_position($item, $currency)
+    private function getReceiptPosition($item, $currency)
     {
         $quantity = abs(!is_null($item->getQtyOrdered()) ? $item->getQtyOrdered() : 0);
         $total = abs(!is_null($item->getRowTotal()) ? $item->getRowTotal() : 0);
@@ -224,7 +224,7 @@ class RequestBuilder
                 }
             }
             if ($_GET['method'] === 'klarna') {
-                $urlData['receipt_data'] = $this->get_receipt_data($order);
+                $urlData['receipt_data'] = $this->getReceiptData($order);
                 $countryId = $order->getBillingAddress()->getCountryId();
                 if ($countryId) {
                     $urlData['customer_country'] = $countryId;
@@ -234,55 +234,84 @@ class RequestBuilder
         return $urlData;
     }
 
-    public function getEmbeddedModeRedirectUrl()
+    public function getPaymentPageParamsForEmbeddedMode()
     {
+        $paymentId = uniqid(EcpConfigHelper::CMS_PREFIX);
+        if ($this->configHelper->isTestMode()) {
+            $paymentId = EcpPaymentIdFormatter::addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
+        }
+
         $grandTotal = $this->checkoutSession->getQuote()->getGrandTotal();
         $currencyCode = $this->checkoutSession->getQuote()->getQuoteCurrencyCode();
         $paymentAmount = EcpConfigHelper::priceMultiplyByCurrencyCode($grandTotal, $currencyCode);
-        $urlData = [
+        $paymentPageParams = [
             'mode' => $paymentAmount > 0 ? 'purchase' : 'card_verify',
             'payment_amount' => $paymentAmount,
             'payment_currency' => $currencyCode,
             'project_id' => $this->configHelper->getProjectId(),
-            'payment_id' => uniqid('mag_'),
+            'payment_id' => $paymentId,
             'force_payment_method' => 'card',
             'target_element' => 'ecommpay-iframe-embedded',
             'frame_mode' => 'iframe',
             'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
             'interface_type' => json_encode($this->configHelper->getInterfaceTypeId()),
             'payment_methods_options' => "{\"additional_data\":{\"embedded_mode\":true}}",
-            'customer_id' => $this->checkoutSession->getQuote()->getCustomerEmail(),
-            'merchant_success_enabled' => 2,
-            'merchant_fail_enabled' => 2,
-            'language_code' => $this->configHelper->getPPLanguage(),
+            'redirect_success_url' => $this->urlBuilder->getUrl(self::SUCCESS_URL),
+            'redirect_success_enabled' => 2,
+            'redirect_success_mode' => 'parent_page',
+            'redirect_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
+            'redirect_fail_enabled' => 2,
+            'redirect_fail_mode' => 'parent_page',
             'customer_email' => $this->checkoutSession->getQuote()->getBillingAddress()->getEmail(),
             'customer_first_name' => $this->checkoutSession->getQuote()->getBillingAddress()->getFirstname(),
             'customer_last_name' => $this->checkoutSession->getQuote()->getBillingAddress()->getLastname(),
-            'billing_country' => $this->checkoutSession->getQuote()->getBillingAddress()->getCountry(),
-            'billing_postal' => $this->checkoutSession->getQuote()->getBillingAddress()->getPostcode(),
             'billing_city' => $this->checkoutSession->getQuote()->getBillingAddress()->getCity(),
             'billing_address' => implode(' ', $this->checkoutSession->getQuote()->getBillingAddress()->getStreet()),
-            'avs_post_code' => $this->checkoutSession->getQuote()->getBillingAddress()->getPostcode(),
-            'avs_street_address' => implode(' ', $this->checkoutSession->getQuote()->getBillingAddress()->getStreet()),
-            '_plugin_version', EcpConfigHelper::PLUGIN_VERSION,
+            '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
             '_magento_version' => $this->magentoVersion,
         ];
+
+
+        if ($this->configHelper->getPPLanguage() != 'default') {
+            $paymentPageParams['language_code'] = $this->configHelper->getPPLanguage();
+        }
+
+        if ($this->checkoutSession->getQuote()->getBillingAddress()->getPostcode()) {
+            $address = implode(' ', $this->checkoutSession->getQuote()->getBillingAddress()->getStreet());
+            if ($address){
+                $paymentPageParams['avs_street_address'] = $address;
+                $paymentPageParams['avs_post_code'] = $this->checkoutSession->getQuote()->getBillingAddress()->getPostcode();
+            }
+            $paymentPageParams['billing_postal'] = $this->checkoutSession->getQuote()->getBillingAddress()->getPostcode();
+        }
+
+        if ($this->checkoutSession->getQuote()->getBillingAddress()->getCountryId()) {
+            $paymentPageParams['billing_country'] = $this->checkoutSession->getQuote()->getBillingAddress()->getCountryId();
+        }
+
+        if ($this->checkoutSession->getQuote()->getBillingAddress()->getRegion()){
+            $paymentPageParams['billing_region'] = $this->checkoutSession->getQuote()->getBillingAddress()->getRegion();
+        }
+
+        if (!empty($this->checkoutSession->getQuote()->getCustomerId())) {
+            $paymentPageParams['customer_id'] = $this->checkoutSession->getQuote()->getCustomerId();
+        }
 
         $additionalParams = $this->configHelper->getAdditionalParameters();
         if (!empty($additionalParams)) {
             $additionalData = [];
             parse_str($additionalParams, $additionalData);
-            $urlData = array_merge($urlData, $additionalData);
+            $paymentPageParams = array_merge($paymentPageParams, $additionalData);
         }
 
-        $urlData['signature'] = $this->signer->getSignature($urlData);
-        $urlArgs = http_build_query($urlData, '', '&');
+        $paymentPageParams['signature'] = $this->signer->getSignature($paymentPageParams, ["frame_mode"]);
 
-        return sprintf(
-            '%s://%s/payment?%s',
+        $paymentPageParams['paymentPageUrl'] = sprintf(
+            '%s://%s/payment',
             $this->configHelper->getProtocol(),
-            $this->configHelper->getPPHost(),
-            $urlArgs
+            $this->configHelper->getPPHost()
         );
+
+        return $paymentPageParams;
     }
 }

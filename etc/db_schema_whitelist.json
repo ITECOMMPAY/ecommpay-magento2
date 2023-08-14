@@ -1,0 +1,33 @@
+{
+    "ecp_order_payment": {
+        "column": {
+            "id": true,
+            "order_id": true,
+            "payment_id": true
+        },
+        "index": {
+            "ECP_ORDER_PAYMENT_PAYMENT_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ECP_ORDER_PAYMENT_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    },
+    "ecp_callback_info": {
+        "column": {
+            "id": true,
+            "order_id": true,
+            "operation_type": true,
+            "payment_id": true,
+            "payment_method": true,
+            "payment_status": true,
+            "callback_message": true,
+            "datetime": true,
+            "operation_id": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ECP_CALLBACK_INFO_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    }
+}

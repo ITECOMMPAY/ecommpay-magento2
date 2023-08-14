@@ -9,7 +9,7 @@ class DisplayMode implements \Magento\Framework\Option\ArrayInterface
         return [
             ['value' => 'redirect', 'label' => __('Redirect')],
             ['value' => 'popup', 'label' => __('Popup')],
-//            ['value' => 'embedded', 'label' => __('Embedded')],
+            ['value' => 'embedded', 'label' => __('Embedded')],
         ];
     }
 }

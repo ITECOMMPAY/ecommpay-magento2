@@ -35,60 +35,61 @@ define(
                 clearInterval(timer);
                 return;
             }
-            console.log('config not loaded yet');
         }, 10);
 
-        rendererList.push(
-            {
-                type: 'ecommpay_card',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_card'
-            },
-            {
-                type: 'ecommpay_googlepay',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_googlepay'
-            },
-            {
-                type: 'ecommpay_open_banking',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_open_banking'
-            },
-            {
-                type: 'ecommpay_paypal',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_paypal'
-            },
-            {
-                type: 'ecommpay_sofort',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_sofort'
-            },
-            {
-                type: 'ecommpay_ideal',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_ideal'
-            },
-            {
-                type: 'ecommpay_klarna',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_klarna'
-            },
-            {
-                type: 'ecommpay_blik',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_blik'
-            },
-            {
-                type: 'ecommpay_giropay',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_giropay'
-            },
-            {
-                type: 'ecommpay_more_methods',
-                component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_more_methods'
-            }
-        );
-
-        if(Object.prototype.hasOwnProperty.call(window, 'ApplePaySession')
-            && window.ApplePaySession.canMakePayments()) {
+        if(window.checkoutConfig.ecommpay_settings.pluginEnabled) {
             rendererList.push(
                 {
-                    type: 'ecommpay_applepay',
-                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_applepay'
+                    type: 'ecommpay_card',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_card'
+                },
+                {
+                    type: 'ecommpay_googlepay',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_googlepay'
+                },
+                {
+                    type: 'ecommpay_open_banking',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_open_banking'
+                },
+                {
+                    type: 'ecommpay_paypal',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_paypal'
+                },
+                {
+                    type: 'ecommpay_sofort',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_sofort'
+                },
+                {
+                    type: 'ecommpay_ideal',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_ideal'
+                },
+                {
+                    type: 'ecommpay_klarna',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_klarna'
+                },
+                {
+                    type: 'ecommpay_blik',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_blik'
+                },
+                {
+                    type: 'ecommpay_giropay',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_giropay'
+                },
+                {
+                    type: 'ecommpay_more_methods',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_more_methods'
                 }
             );
+
+            if (Object.prototype.hasOwnProperty.call(window, 'ApplePaySession')
+                && window.ApplePaySession.canMakePayments()) {
+                rendererList.push(
+                    {
+                        type: 'ecommpay_applepay',
+                        component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_applepay'
+                    }
+                );
+            }
         }
 
         return Component.extend({});

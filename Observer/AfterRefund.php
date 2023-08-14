@@ -30,7 +30,7 @@ class AfterRefund implements ObserverInterface
 
         if ($payment->getOrder()->getTotalRefunded() < $payment->getOrder()->getGrandTotal()) {
             $order = $payment->getOrder();
-            $order->setStatus('partial_refund');
+            $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
             $order->setState(\Magento\Sales\Model\Order::STATE_COMPLETE);
             $order->save();
             return;

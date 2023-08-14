@@ -16,21 +16,21 @@
             <config_path>payment/ecommpay_card/title</config_path>
         </field>
 
-        <!--<field id="ecommpay_card_show_description" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">-->
-        <!--    <label>Show descripton</label>-->
-        <!--    <comment><![CDATA[Display the payment method description which user sees during checkout]]></comment>-->
-        <!--    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>-->
-        <!--    <config_path>payment/ecommpay_card/show_description</config_path>-->
-        <!--</field>-->
+        <field id="ecommpay_card_show_description" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+            <label>Show descripton</label>
+            <comment><![CDATA[Display the payment method description which user sees during checkout]]></comment>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <config_path>payment/ecommpay_card/show_description</config_path>
+        </field>
 
-        <!--<field id="ecommpay_card_description" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">-->
-        <!--    <label>Description</label>-->
-        <!--    <comment><![CDATA[This controls the description which the user sees during checkout]]></comment>-->
-        <!--    <config_path>payment/ecommpay_card/description</config_path>-->
-        <!--    <depends>-->
-        <!--        <field id="ecommpay_card_show_description">1</field>-->
-        <!--    </depends>-->
-        <!--</field>-->
+        <field id="ecommpay_card_description" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+            <label>Description</label>
+            <comment><![CDATA[This controls the description which the user sees during checkout]]></comment>
+            <config_path>payment/ecommpay_card/description</config_path>
+            <depends>
+                <field id="ecommpay_card_show_description">1</field>
+            </depends>
+        </field>
 
         <field id="ecommpay_card_display_mode" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
             <label>Display mode</label>

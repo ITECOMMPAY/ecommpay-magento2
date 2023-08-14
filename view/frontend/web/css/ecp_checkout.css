@@ -46,7 +46,7 @@
     display: none;
 }
 
-.ecommpay-loader-overlay {
+#ecommpay-overlay-loader {
     z-index: 1000;
     border: medium none;
     margin: 0;
