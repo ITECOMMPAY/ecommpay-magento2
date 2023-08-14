@@ -2,10 +2,16 @@
 
 namespace Ecommpay\Payments\Common;
 
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\UrlInterface;
+use Magento\Checkout\Model\Session;
+
 class RequestBuilder
 {
-    const SUCCESS_URL = 'checkout/onepage/success';
-    const FAIL_URL = 'checkout/onepage/failure';
+    private const SUCCESS_URL = 'checkout/onepage/success';
+    private const FAIL_URL = 'checkout/onepage/failure';
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
@@ -29,39 +35,43 @@ class RequestBuilder
     /**
      * @var EcpSigner
      */
-    protected $signer;
+    public $signer;
 
     protected $magentoVersion;
 
     /**
      * Signer constructor.
      */
-    public function __construct()
+    public function __construct(RequestInterface $request)
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 
-        $this->scopeConfig = $objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
-        $this->checkoutSession = $objectManager->get('\Magento\Checkout\Model\Session');
-        $this->urlBuilder = $objectManager->get('Magento\Framework\UrlInterface');
+        $this->request = $request;
+        $this->scopeConfig = $objectManager->get(ScopeConfigInterface::class);
+        $this->checkoutSession = $objectManager->get(Session::class);
+        $this->urlBuilder = $objectManager->get(UrlInterface::class);
         $this->configHelper = EcpConfigHelper::getInstance();
         $this->signer = new EcpSigner();
-        $productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
+        $productMetadata = $objectManager->get(ProductMetadataInterface::class);
         $this->magentoVersion = $productMetadata->getVersion();
     }
 
     /**
-     * @return string
-     */
+     *
+     * @return string */
     public function getPaymentPageParams(\Magento\Sales\Model\Order $order)
     {
         $orderPaymentManager = new OrderPaymentManager();
         $paymentId = uniqid(EcpConfigHelper::CMS_PREFIX);
         if ($this->configHelper->isTestMode()) {
-            $paymentId = EcpPaymentIdFormatter::addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
+            $paymentIdFormater = new EcpPaymentIdFormatter($this->request);
+            $paymentId = $paymentIdFormater->addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
         }
-        $orderPaymentManager->insert($order->getEntityId(),$paymentId);
+        $orderPaymentManager->insert($order->getEntityId(), $paymentId);
         $paymentPageParams = $this->buildParams($order, $paymentId);
         $paymentPageParams = $this->appendPaymentMethod($paymentPageParams, $order);
+
+        $paymentPageParams = $this->signer->unsetNullParams($paymentPageParams);
 
         $paymentPageParams['signature'] = $this->signer->getSignature($paymentPageParams);
 
@@ -74,65 +84,67 @@ class RequestBuilder
     }
 
     /**
-     * @param array $config
-     * @param $successUrl
-     * @param $failUrl
+     *
+     * @param Order $order
+     * @param string $paymentId
      * @return array
      */
     protected function buildParams(\Magento\Sales\Model\Order $order, $paymentId)
     {
         $currencyCode = $order->getOrderCurrencyCode();
         $paymentAmount = EcpConfigHelper::priceMultiplyByCurrencyCode($order->getTotalDue(), $currencyCode);
-        $result = [
+        $baseParams = [
             'project_id' => $this->configHelper->getProjectId(),
             'payment_amount' => $paymentAmount,
             'payment_id' => $paymentId,
             'payment_currency' => $currencyCode,
+            'interface_type' => json_encode($this->configHelper->getInterfaceTypeId()),
             'merchant_success_url' => $this->urlBuilder->getUrl(self::SUCCESS_URL),
             'merchant_success_enabled' => 2,
             'merchant_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
             'merchant_fail_enabled' => 2,
             'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
-            'interface_type' => json_encode($this->configHelper->getInterfaceTypeId()),
-            'customer_email' => $order->getBillingAddress()->getEmail(),
-            'customer_first_name' => $order->getBillingAddress()->getFirstname(),
-            'customer_last_name' => $order->getBillingAddress()->getLastname(),
-            'customer_phone' => $order->getBillingAddress()->getTelephone(),
-            'billing_city' => $order->getBillingAddress()->getCity(),
-            'billing_address' => implode(' ', $order->getBillingAddress()->getStreet()),
-            'avs_street_address' => implode(' ', $order->getBillingAddress()->getStreet()),
             '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
             '_magento_version' => $this->magentoVersion
         ];
+
+        $optinalParams = $this->getBillingDataFromOrder($order);
+
+        $optinalParams['customer_id'] = $order->getCustomerId();
+
         if ($this->configHelper->getPPLanguage() != 'default') {
-            $result['language_code'] = $this->configHelper->getPPLanguage();
-        }
-        if ($order->getBillingAddress()->getPostcode()) {
-            $result['avs_post_code'] = $order->getBillingAddress()->getPostcode();
-            $result['billing_postal'] = $order->getBillingAddress()->getPostcode();
-        }
-        if ($order->getBillingAddress()->getCountryId()) {
-            $result['billing_country'] = $order->getBillingAddress()->getCountryId();
-        }
-        if ($order->getBillingAddress()->getRegion()){
-            $result['billing_region'] = $order->getBillingAddress()->getRegion();
-        }
-        if ($order->getCustomerId()) {
-            $result['customer_id'] = $order->getCustomerId();
-        }
-        if(empty($result['avs_street_address']) || empty($result['avs_post_code'])) {
-            $result['avs_street_address'] = null; //initialize both keys if not exists
-            $result['avs_street_address'] = null;
-            unset($result['avs_street_address']);
-            unset($result['avs_street_address']);
-        }
-        $additionalParams = $this->configHelper->getAdditionalParameters();
-        if (!empty($additionalParams)) {
-                $additionalData = [];
-                parse_str($additionalParams, $additionalData);
-                $result = array_merge($result, $additionalData);
+            $optinalParams['language_code'] = $this->configHelper->getPPLanguage();
         }
 
+        $additionalParams = $this->configHelper->getAdditionalParameters();
+        if (!empty($additionalParams)) {
+            $additionalData = [];
+            parse_str($additionalParams, $additionalData);
+            $optinalParams = array_merge($optinalParams, $additionalData);
+        }
+        $optinalParams = $this->signer->unsetNullParams($optinalParams);
+        return array_merge($baseParams, $optinalParams);
+    }
+
+    public function getBillingDataFromOrder(\Magento\Sales\Model\Order $order) {
+        $billingAddress = $order->getBillingAddress();
+        $address = implode(' ', $billingAddress->getStreet());
+        $postCode = $billingAddress->getPostcode();
+        $result = [
+            'customer_email' => $billingAddress->getEmail(),
+            'customer_first_name' => $billingAddress->getFirstname(),
+            'customer_last_name' => $billingAddress->getLastname(),
+            'customer_phone' => $billingAddress->getTelephone(),
+            'billing_country' => $billingAddress->getCountryId(),
+            'billing_region' => $order->getBillingAddress()->getRegion(),
+            'billing_city' => $billingAddress->getCity(),
+            'billing_address' => $address,
+            'billing_postal' => $postCode,
+        ];
+        if ($address !== null && $postCode !== null) {
+            $result['avs_street_address'] = $address;
+            $result['avs_post_code'] = $postCode;
+        }
         return $result;
     }
 
@@ -171,10 +183,10 @@ class RequestBuilder
 
     private function getReceiptPosition($item, $currency)
     {
-        $quantity = abs(!is_null($item->getQtyOrdered()) ? $item->getQtyOrdered() : 0);
-        $total = abs(!is_null($item->getRowTotal()) ? $item->getRowTotal() : 0);
+        $quantity = abs(!($item->getQtyOrdered() === null) ? $item->getQtyOrdered() : 0);
+        $total = abs(!($item->getRowTotal() === null) ? $item->getRowTotal() : 0);
         $total = EcpConfigHelper::priceMultiplyByCurrencyCode($total, $currency);
-        $totalTax = abs(!is_null($item->getTaxAmount()) ? $item->getTaxAmount() : 0);
+        $totalTax = abs(!($item->getTaxAmount() === null) ? $item->getTaxAmount() : 0);
         $totalTax = EcpConfigHelper::priceMultiplyByCurrencyCode($totalTax, $currency);
         $description = $item->getName();
         $taxPercentage = $item->getTaxPercent();
@@ -186,7 +198,7 @@ class RequestBuilder
             // Quantity of the goods or services. Multiple of: 0.000001.
             $data['quantity'] = round($quantity, 6);
         }
-        if (!is_null($description) && (strlen($description) > 0)) {
+        if (!($description === null) && (strlen($description) > 0)) {
             // Goods or services description. >= 1 characters<= 255 characters.
             $data['description'] = $description;
         }
@@ -212,18 +224,19 @@ class RequestBuilder
             'klarna',
             'paypal-wallet'
         ];
-        if (!empty($_GET['method'])) {
-            if ($_GET['method'] === 'open_banking') {
+        $methodParam = $this->request->getParam('method');
+        if (!empty($methodParam)) {
+            if ($methodParam === 'open_banking') {
                 $urlData['force_payment_group'] = 'openbanking';
-            } else if (in_array($_GET['method'], $forcePaymentMethods)) {
-                $urlData['force_payment_method'] = $_GET['method'];
-            } else if ($_GET['method'] === 'more_methods') {
+            } elseif (in_array($methodParam, $forcePaymentMethods)) {
+                $urlData['force_payment_method'] = $methodParam;
+            } elseif ($methodParam === 'more_methods') {
                 $forceMethodForMoreMethods = $this->configHelper->getForceMethodForMoreMethods();
                 if (!empty($forceMethodForMoreMethods)) {
                     $urlData['force_payment_method'] = $forceMethodForMoreMethods;
                 }
             }
-            if ($_GET['method'] === 'klarna') {
+            if ($methodParam === 'klarna') {
                 $urlData['receipt_data'] = $this->getReceiptData($order);
                 $countryId = $order->getBillingAddress()->getCountryId();
                 if ($countryId) {
@@ -236,13 +249,15 @@ class RequestBuilder
 
     public function getPaymentPageParamsForEmbeddedMode()
     {
+        $quote = $this->checkoutSession->getQuote();
         $paymentId = uniqid(EcpConfigHelper::CMS_PREFIX);
         if ($this->configHelper->isTestMode()) {
-            $paymentId = EcpPaymentIdFormatter::addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
+            $paymentIdFormater = new EcpPaymentIdFormatter($this->request);
+            $paymentId = $paymentIdFormater->addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
         }
 
-        $grandTotal = $this->checkoutSession->getQuote()->getGrandTotal();
-        $currencyCode = $this->checkoutSession->getQuote()->getQuoteCurrencyCode();
+        $grandTotal = $quote->getGrandTotal();
+        $currencyCode = $quote->getQuoteCurrencyCode();
         $paymentAmount = EcpConfigHelper::priceMultiplyByCurrencyCode($grandTotal, $currencyCode);
         $paymentPageParams = [
             'mode' => $paymentAmount > 0 ? 'purchase' : 'card_verify',
@@ -262,39 +277,16 @@ class RequestBuilder
             'redirect_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
             'redirect_fail_enabled' => 2,
             'redirect_fail_mode' => 'parent_page',
-            'customer_email' => $this->checkoutSession->getQuote()->getBillingAddress()->getEmail(),
-            'customer_first_name' => $this->checkoutSession->getQuote()->getBillingAddress()->getFirstname(),
-            'customer_last_name' => $this->checkoutSession->getQuote()->getBillingAddress()->getLastname(),
-            'billing_city' => $this->checkoutSession->getQuote()->getBillingAddress()->getCity(),
-            'billing_address' => implode(' ', $this->checkoutSession->getQuote()->getBillingAddress()->getStreet()),
             '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
             '_magento_version' => $this->magentoVersion,
         ];
-
 
         if ($this->configHelper->getPPLanguage() != 'default') {
             $paymentPageParams['language_code'] = $this->configHelper->getPPLanguage();
         }
 
-        if ($this->checkoutSession->getQuote()->getBillingAddress()->getPostcode()) {
-            $address = implode(' ', $this->checkoutSession->getQuote()->getBillingAddress()->getStreet());
-            if ($address){
-                $paymentPageParams['avs_street_address'] = $address;
-                $paymentPageParams['avs_post_code'] = $this->checkoutSession->getQuote()->getBillingAddress()->getPostcode();
-            }
-            $paymentPageParams['billing_postal'] = $this->checkoutSession->getQuote()->getBillingAddress()->getPostcode();
-        }
-
-        if ($this->checkoutSession->getQuote()->getBillingAddress()->getCountryId()) {
-            $paymentPageParams['billing_country'] = $this->checkoutSession->getQuote()->getBillingAddress()->getCountryId();
-        }
-
-        if ($this->checkoutSession->getQuote()->getBillingAddress()->getRegion()){
-            $paymentPageParams['billing_region'] = $this->checkoutSession->getQuote()->getBillingAddress()->getRegion();
-        }
-
         if (!empty($this->checkoutSession->getQuote()->getCustomerId())) {
-            $paymentPageParams['customer_id'] = $this->checkoutSession->getQuote()->getCustomerId();
+            $paymentPageParams['customer_id'] = $quote->getCustomerId();
         }
 
         $additionalParams = $this->configHelper->getAdditionalParameters();
@@ -303,6 +295,8 @@ class RequestBuilder
             parse_str($additionalParams, $additionalData);
             $paymentPageParams = array_merge($paymentPageParams, $additionalData);
         }
+
+        $paymentPageParams = $this->signer->unsetNullParams($paymentPageParams);
 
         $paymentPageParams['signature'] = $this->signer->getSignature($paymentPageParams, ["frame_mode"]);
 

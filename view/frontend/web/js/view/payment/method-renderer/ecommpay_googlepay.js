@@ -15,7 +15,7 @@ define(
             var url = paymentPageParams.paymentPageUrl;
             delete paymentPageParams.paymentPageUrl;
             let form =
-                $('<form/>', {
+                $('<form>', {
                     method: 'post',
                     action: url,
                     style: {
@@ -24,7 +24,7 @@ define(
                 });
 
             $.each(paymentPageParams, function (key, value) {
-                form.append($('<input/>', {
+                form.append($('<input>', {
                     type: 'hidden',
                     name: key,
                     value: value

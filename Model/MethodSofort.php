@@ -2,10 +2,11 @@
 
 namespace Ecommpay\Payments\Model;
 
+use Ecommpay\Payments\Block\Info\BaseInfoBlock;
 
 class MethodSofort extends EcpAbstractMethod
 {
-    const PAYMENT_METHOD_NAME_SOFORT = 'ecommpay_sofort';
+    private const PAYMENT_METHOD_NAME_SOFORT = 'ecommpay_sofort';
 
     /**
      * Payment method code
@@ -17,7 +18,7 @@ class MethodSofort extends EcpAbstractMethod
     /**
      * @var string
      */
-    protected $_infoBlockType = 'Ecommpay\Payments\Block\Info\BaseInfoBlock';
+    protected $_infoBlockType = BaseInfoBlock::class;
 
     /**
      * Availability option

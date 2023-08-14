@@ -2,10 +2,11 @@
 
 namespace Ecommpay\Payments\Model;
 
+use Ecommpay\Payments\Block\Info\BaseInfoBlock;
 
 class MethodOpenBanking extends EcpAbstractMethod
 {
-    const PAYMENT_METHOD_NAME_OPEN_BANKING = 'ecommpay_open_banking';
+    private const PAYMENT_METHOD_NAME_OPEN_BANKING = 'ecommpay_open_banking';
 
     /**
      * Payment method code
@@ -17,7 +18,7 @@ class MethodOpenBanking extends EcpAbstractMethod
     /**
      * @var string
      */
-    protected $_infoBlockType = 'Ecommpay\Payments\Block\Info\BaseInfoBlock';
+    protected $_infoBlockType = BaseInfoBlock::class;
 
     /**
      * Availability option

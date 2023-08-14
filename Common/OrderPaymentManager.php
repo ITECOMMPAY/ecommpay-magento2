@@ -2,9 +2,11 @@
 
 namespace Ecommpay\Payments\Common;
 
+use Magento\Framework\App\ResourceConnection;
+
 class OrderPaymentManager
 {
-    const TABLE_NAME = 'ecp_order_payment';
+    private const TABLE_NAME = 'ecp_order_payment';
     /** @var \Magento\Framework\DB\Adapter\AdapterInterface  */
     private $connection;
     private $tableName;
@@ -12,12 +14,13 @@ class OrderPaymentManager
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         /** @var \Magento\Framework\App\ResourceConnection $resource */
-        $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+        $resource = $objectManager->get(ResourceConnection::class);
         $this->tableName = $resource->getTableName(self::TABLE_NAME);
         $this->connection = $resource->getConnection();
     }
 
     /**
+     *
      * @param int $orderId
      * @param string $paymentId
      * @return int inserted rows count

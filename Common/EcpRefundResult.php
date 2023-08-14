@@ -41,32 +41,32 @@ class EcpRefundResult
     }
 
     /**
-     * @return bool
-     */
+     *
+     * @return bool */
     public function isSuccess()
     {
         return strtolower($this->status) === 'success';
     }
 
     /**
-     * @return string|null
-     */
+     *
+     * @return string|null */
     public function getRefundExternalId()
     {
         return $this->refundExternalId;
     }
 
     /**
-     * @return string|null
-     */
+     *
+     * @return string|null */
     public function getOrderId()
     {
         return $this->orderId;
     }
 
     /**
-     * @return null|string
-     */
+     *
+     * @return null|string */
     public function getDescription()
     {
         return $this->description;

@@ -28,6 +28,7 @@ class EmbeddedForm extends Action
 
     /**
      * @param Context $context
+     * @param Session $checkoutSession
      */
     public function __construct(
         Context $context,
@@ -35,9 +36,9 @@ class EmbeddedForm extends Action
     ) {
         parent::__construct($context);
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $this->request = $objectManager->get('\Magento\Framework\App\Request\Http');
-        $this->resultJsonFactory = $objectManager->get('\Magento\Framework\Controller\Result\JsonFactory');
-        $this->requestBuilder = new RequestBuilder();
+        $this->request = $objectManager->get(Http::class);
+        $this->resultJsonFactory = $objectManager->get(JsonFactory::class);
+        $this->requestBuilder = new RequestBuilder($this->request);
         $this->checkoutSession = $checkoutSession;
     }
 
@@ -49,7 +50,7 @@ class EmbeddedForm extends Action
     public function execute()
     {
         $action = ($this->request->getQuery('action', 'create'));
-        switch($action) {
+        switch ($action) {
             case 'create':
                 $result = [
                     'success' => true,
@@ -80,20 +81,23 @@ class EmbeddedForm extends Action
         if (!($order instanceof  Order)) {
             return ['success' => false, 'error' => 'Order not found in session'];
         }
-        $orderPaymentManager->insert($order->getEntityId(),$paymentId);
+        $orderPaymentManager->insert($order->getEntityId(), $paymentId);
         
-        $order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT, true);
-        $order->setStatus(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+        $order->setState(Order::STATE_PENDING_PAYMENT, true);
+        $order->setStatus(Order::STATE_PENDING_PAYMENT);
         $order->addStatusToHistory($order->getStatus(), 'Order pending payment by ecommpay');
         $order->save();
         
-        return ['success' => true];
+        $billingInfo = $this->requestBuilder->getBillingDataFromOrder($order);
+        $billingInfo = $this->requestBuilder->signer->unsetNullParams($billingInfo);
+        
+        return ['success' => true, 'data' => $billingInfo];
     }
 
     private function checkCartAmount($queryAmount): array
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $checkoutSession = $objectManager->get('\Magento\Checkout\Model\Session');
+        $checkoutSession = $objectManager->get(Session::class);
         $grandTotal = $checkoutSession->getQuote()->getGrandTotal();
         $currencyCode = $checkoutSession->getQuote()->getQuoteCurrencyCode();
         $cartPaymentAmount = EcpConfigHelper::priceMultiplyByCurrencyCode($grandTotal, $currencyCode);

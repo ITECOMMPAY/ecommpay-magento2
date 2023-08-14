@@ -5,8 +5,8 @@ namespace Ecommpay\Payments\Model\Config;
 class Currency implements \Magento\Framework\Option\ArrayInterface
 {
     /**
-     * @return array
-     */
+     *
+     * @return array */
     public function toOptionArray()
     {
         return [

@@ -2,10 +2,11 @@
 
 namespace Ecommpay\Payments\Model;
 
+use Ecommpay\Payments\Block\Info\BaseInfoBlock;
 
 class MethodGooglepay extends EcpAbstractMethod
 {
-    const PAYMENT_METHOD_NAME_GOOGLEPAY = 'ecommpay_googlepay';
+    private const PAYMENT_METHOD_NAME_GOOGLEPAY = 'ecommpay_googlepay';
 
     /**
      * Payment method code
@@ -17,7 +18,7 @@ class MethodGooglepay extends EcpAbstractMethod
     /**
      * @var string
      */
-    protected $_infoBlockType = 'Ecommpay\Payments\Block\Info\BaseInfoBlock';
+    protected $_infoBlockType = BaseInfoBlock::class;
 
     /**
      * Availability option

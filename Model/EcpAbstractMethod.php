@@ -2,17 +2,17 @@
 
 namespace Ecommpay\Payments\Model;
 
-use Ecommpay\Payments\Common\EcpConfigHelper;
 use Ecommpay\Payments\Common\EcpRefundProcessor;
+use Ecommpay\Payments\Common\Exception\EcpGateRequestException;
 use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Sales\Model\Order\Payment;
-
 
 abstract class EcpAbstractMethod extends \Magento\Payment\Model\Method\AbstractMethod
 {
     protected $refundEndpoint = null;
 
     /**
+     *
      * @param \Magento\Payment\Model\InfoInterface $payment
      * @param float $amount
      * @return $this
@@ -37,22 +37,22 @@ abstract class EcpAbstractMethod extends \Magento\Payment\Model\Method\AbstractM
                 $currencyCode,
                 $this->refundEndpoint
             );
-        } catch (\Exception $e) {
-            $creditMemo->addComment('Request was not correctly processed by gateway.');
+        } catch (EcpGateRequestException $e) {
+            $creditMemo->addComment('Request was not correctly processed by gateway. ' . $e->getMessage());
             $creditMemo->setState(Creditmemo::STATE_CANCELED);
             return $this;
         }
-
-        if ($ecpRefundResult->getRefundExternalId() === null) {
+        
+        $externalId = $ecpRefundResult->getRefundExternalId();
+        
+        if ($externalId === null) {
             $creditMemo->addComment('Request was declined by gateway.');
             $creditMemo->setState(Creditmemo::STATE_CANCELED);
             return $this;
         }
-
+        
         $creditMemo->setState(Creditmemo::STATE_OPEN);
-
-        $creditMemo->addComment(sprintf(EcpRefundProcessor::REFUND_ID_CONTAINING_COMMENT, $ecpRefundResult->getRefundExternalId()));
-
+        $creditMemo->addComment(sprintf(EcpRefundProcessor::REFUND_ID_CONTAINING_COMMENT, $externalId));
         return $this;
     }
 }

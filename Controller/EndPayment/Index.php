@@ -9,10 +9,12 @@ use Ecommpay\Payments\Common\EcpRefundProcessor;
 use Ecommpay\Payments\Common\EcpRefundResult;
 use Ecommpay\Payments\Common\EcpSigner;
 use Ecommpay\Payments\Common\OrderPaymentManager;
+use Ecommpay\Payments\Common\Exception\EcpCallbackHandlerException;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Framework\App\Request\InvalidRequestException;
@@ -21,7 +23,6 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Sales\Model\Order\Creditmemo;
-
 
 class Index extends Action implements CsrfAwareActionInterface
 {
@@ -56,23 +57,26 @@ class Index extends Action implements CsrfAwareActionInterface
     protected $orderPaymentManager;
 
     /**
+     *
      * @param Context $context
-     * @param PageFactory $pageFactory
+     * @param RequestInterface $request
      * @param OrderRepositoryInterface $orderRepository
      * @param CreditmemoRepositoryInterface $creditmemoRepository
      * @param InvoiceService $invoiceService
+     * @param PageFactory $pageFactory
      * @param JsonFactory $resultJsonFactory
      */
     public function __construct(
         Context $context,
+        RequestInterface $request,
         OrderRepositoryInterface $orderRepository,
         CreditmemoRepositoryInterface $creditmemoRepository,
         InvoiceService $invoiceService,
         PageFactory $pageFactory,
         JsonFactory $resultJsonFactory
-    )
-    {
+    ) {
         parent::__construct($context);
+        $this->request = $request;
         $this->orderRepository = $orderRepository;
         $this->creditmemoRepository = $creditmemoRepository;
         $this->invoiceService = $invoiceService;
@@ -94,18 +98,24 @@ class Index extends Action implements CsrfAwareActionInterface
         return true;
     }
 
+    private function sendResultJson($data = 'Ok', array $errors = [], $responseCode = 200)
+    {
+        $resultJson = $this->resultJsonFactory->create();
+        $resultJson->setHttpResponseCode($responseCode);
+        return $resultJson->setData(['Message' => $data, 'Errors' => $errors]);
+    }
+
     public function execute()
     {
-        $body = file_get_contents('php://input');
+        $body = $this->request->getContent();
 
         try {
             $callbackDto = EcpCallbackDTO::create($body);
-            if (!$this->signer->checkSignature($callbackDto->getCallbackArray())) {
-                throw new \Exception('Wrong callback data signature.');
-            }
-        } catch (\Exception $e) {
-            http_response_code(400);
-            die($e->getMessage());
+        } catch (EcpCallbackHandlerException $e) {
+            return $this->sendResultJson('Unknown operation identifier.', [$e->getMessage()], 400);
+        }
+        if (!$this->signer->checkSignature($callbackDto->getCallbackArray())) {
+            return $this->sendResultJson('Signature invalid', [], 400);
         }
 
         $orderId = $this->orderPaymentManager->getOrderIdByPaymentId($callbackDto->getPaymentId());
@@ -127,40 +137,41 @@ class Index extends Action implements CsrfAwareActionInterface
             $callbackDto->getMessage()
         );
 
-        $resource = $this->_objectManager->get('Magento\Framework\App\ResourceConnection');
+        $resource = $this->_objectManager->get(ResourceConnection::class);
         /** @var \Magento\Framework\App\ResourceConnection $resource */
         $connection = $resource->getConnection();
         $tableName = $resource->getTableName('sales_creditmemo_comment');
-
+        $select = $connection->select()->from(
+            ['scc' => $tableName],
+            ['scc.entity_id', 'scc.parent_id']
+        )->where('scc.comment = :comment');
         $comment = sprintf(EcpRefundProcessor::REFUND_ID_CONTAINING_COMMENT, $ecpCallbackResult->getRefundExternalId());
-
-        $sql = 'SELECT entity_id, parent_id FROM ' . $tableName . ' WHERE comment = :comment';
         $queryParams = ['comment' => $comment];
+        $result = $connection->fetchRow($select, $queryParams);
 
-        $result = $connection->fetchRow($sql, $queryParams);
         if (!$result) {
-            http_response_code(400);
-            die('Unknown operation identifier.');
+            return $this->sendResultJson('Unknown operation identifier.', [$result], 400);
         }
         try {
             /** @var Creditmemo $cm */
             $cm = $this->creditmemoRepository->get($result['parent_id']);
             $order = $cm->getOrder();
         } catch (\Exception $e) {
-            http_response_code(400);
-            die('Unable to find a refund request.');
+            return $this->sendResultJson('Unable to find a refund request.', [$e->getMessage()], 400);
         }
 
         if (!$connection->delete($tableName, 'entity_id = ' . $result['entity_id'])) {
-            http_response_code(400);
-            die('Unable to process callback.');
+            return $this->sendResultJson('Unable to process callback.', [], 400);
         }
 
-        $now = new \DateTime();
+        $datatime = new \DateTime();
+        $now = $datatime->format('d.m.Y H:i:s');
         $refundId = $cm->getId();
-        if (in_array($callbackDto->getPaymentStatus(), ['reversed', 'refunded', 'partially reversed', 'partially refunded'])) {
+        $refundStatuses = ['reversed', 'refunded', 'partially reversed', 'partially refunded'];
+        if (in_array($callbackDto->getPaymentStatus(), $refundStatuses)) {
             $cm->setState(Creditmemo::STATE_REFUNDED);
-            $cm->addComment('Money-back request #' . $refundId . ' was successfully processed at ' . $now->format('d.m.Y H:i:s'));
+            $commentFormat = 'Money-back request #%s was successfully processed at %s';
+            $cm->addComment(sprintf($commentFormat, $refundId, $now));
             if (in_array($callbackDto->getPaymentStatus(), ['reversed', 'refunded'])) {
                 $order->setStatus(\Magento\Sales\Model\Order::STATE_CLOSED)->save();
             } else {
@@ -168,26 +179,24 @@ class Index extends Action implements CsrfAwareActionInterface
             }
         } else {
             $cm->setState(Creditmemo::STATE_CANCELED);
-            $cm->addComment('Money-back request #' . $refundId . ' was declined at ' . $now->format('d.m.Y H:i:s') . '. Reason: ' . $ecpCallbackResult->getDescription());
+            $commentFormat = 'Money-back request #%s was declined at %s. Reason: %s';
+            $cm->addComment(sprintf($commentFormat, $refundId, $now, $ecpCallbackResult->getDescription()));
         }
         try {
             $cm->save();
         } catch (\Exception $e) {
-            http_response_code(400);
-            die('Unable to process callback.');
+            return $this->sendResultJson('Coudn`t save credit memo', [$e->getMessage()], 500);
         }
 
-        http_response_code(200);
-        die();
+        return $this->sendResultJson();
     }
 
-
     /**
+     *
      * @param Order $order
      * @param string $message
-     * @param int $paymentId
+     * @param string $operationId
      * @throws \Exception
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function updateOrderStatus($order, $message, $operationId)
     {
@@ -201,7 +210,9 @@ class Index extends Action implements CsrfAwareActionInterface
         $invoice->setState(\Magento\Sales\Model\Order\Invoice::STATE_PAID);
         $invoice->save();
 
-        /** @var Order\Payment $payment */
+        /**
+         *
+         * @var Order\Payment $payment */
         $payment = $order->getPayment();
         $payment->pay($invoice);
         $order->setTotalPaid($order->getTotalPaid() + $payment->getAmountPaid());
@@ -217,11 +228,9 @@ class Index extends Action implements CsrfAwareActionInterface
         try {
             $order = $this->orderRepository->get($orderId);
         } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
-            http_response_code(200);
-            die('Order does not exist');
+            return $this->sendResultJson('Order does not exist', [$e->getMessage()], 404);
         } catch (\Magento\Framework\Exception\InputException $e) {
-            http_response_code(200);
-            die('Order does not exist, no order_id is provided');
+            return $this->sendResultJson('Order does not exist, no order_id is provided', [$e->getMessage()], 404);
         }
 
         switch ($callbackDto->getPaymentStatus()) {
@@ -257,7 +266,6 @@ class Index extends Action implements CsrfAwareActionInterface
             $callbackDto->getMessage(),
             $callbackDto->getOperationId()
         );
-        http_response_code(200);
-        die('OK');
+        return $this->sendResultJson();
     }
 }

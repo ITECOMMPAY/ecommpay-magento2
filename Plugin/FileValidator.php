@@ -7,12 +7,12 @@ use \Magento\Framework\App\State;
 /**
  * Class FileValidator
  *
- * @package Ecommpay\Payments\Plugin
  * Special override file-validator for enable symlinked templates from module (for development mode)
  */
 class FileValidator
 {
     /**
+     *
      * @var State
      */
     protected $_appState;

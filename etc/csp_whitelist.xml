@@ -10,37 +10,58 @@
     <policies>
         <policy id="img-src">
             <values>
+                <!-- при загрузке в Гитхаб/стор удалить все значения кроме продовского-->
                 <value id="ecommpay_terminal" type="host">paymentpage.ecommpay.com</value>
+                <value id="ecommpay_terminal-test" type="host">paymentpage.westresscode.net</value>
+                <value id="ecommpay_terminal-local" type="host">pp.terminal.test</value>
             </values>
         </policy>
         <policy id="script-src">
             <values>
+                <!-- при загрузке в Гитхаб/стор удалить все значения кроме продовского-->
                 <value id="ecommpay_terminal" type="host">paymentpage.ecommpay.com</value>
+                <value id="ecommpay_terminal-test" type="host">paymentpage.westresscode.net</value>
+                <value id="ecommpay_terminal-local" type="host">pp.terminal.test</value>
             </values>
         </policy>
         <policy id="connect-src">
             <values>
+                <!-- при загрузке в Гитхаб/стор удалить все значения кроме продовского-->
                 <value id="ecommpay_terminal" type="host">paymentpage.ecommpay.com</value>
+                <value id="ecommpay_terminal-test" type="host">paymentpage.westresscode.net</value>
+                <value id="ecommpay_terminal-local" type="host">pp.terminal.test</value>
             </values>
         </policy>
         <policy id="frame-src">
             <values>
+                <!-- при загрузке в Гитхаб/стор удалить все значения кроме продовского-->
                 <value id="ecommpay_terminal" type="host">paymentpage.ecommpay.com</value>
+                <value id="ecommpay_terminal-test" type="host">paymentpage.westresscode.net</value>
+                <value id="ecommpay_terminal-local" type="host">pp.terminal.test</value>
             </values>
         </policy>
         <policy id="form-action">
             <values>
+                <!-- при загрузке в Гитхаб/стор удалить все значения кроме продовского-->
                 <value id="ecommpay_terminal" type="host">paymentpage.ecommpay.com</value>
+                <value id="ecommpay_terminal-test" type="host">paymentpage.westresscode.net</value>
+                <value id="ecommpay_terminal-local" type="host">pp.terminal.test</value>
             </values>
         </policy>
         <policy id="connect-src">
             <values>
+                <!-- при загрузке в Гитхаб/стор удалить все значения кроме продовского-->
                 <value id="ecommpay_terminal" type="host">paymentpage.ecommpay.com</value>
+                <value id="ecommpay_terminal-test" type="host">paymentpage.westresscode.net</value>
+                <value id="ecommpay_terminal-local" type="host">pp.terminal.test</value>
             </values>
         </policy>
         <policy id="style-src">
             <values>
+                <!-- при загрузке в Гитхаб/стор удалить все значения кроме продовского-->
                 <value id="ecommpay_terminal" type="host">paymentpage.ecommpay.com</value>
+                <value id="ecommpay_terminal-test" type="host">paymentpage.westresscode.net</value>
+                <value id="ecommpay_terminal-local" type="host">pp.terminal.test</value>
             </values>
         </policy>
     </policies>

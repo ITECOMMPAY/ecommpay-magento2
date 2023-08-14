@@ -2,17 +2,21 @@
 
 namespace Ecommpay\Payments\Common;
 
+use Magento\Framework\App\ResourceConnection;
+
 class CallbackInfoManager
 {
-    const TABLE_NAME = 'ecp_callback_info';
+    private const TABLE_NAME = 'ecp_callback_info';
     /** @var \Magento\Framework\DB\Adapter\AdapterInterface  */
     private $connection;
     private $tableName;
     public function __construct()
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        /** @var \Magento\Framework\App\ResourceConnection $resource */
-        $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+        /**
+         *
+         * @var ResourceConnection $resource */
+        $resource = $objectManager->get(ResourceConnection::class);
         $this->tableName = $resource->getTableName(self::TABLE_NAME);
         $this->connection = $resource->getConnection();
     }
@@ -25,8 +29,7 @@ class CallbackInfoManager
         string $paymentStatus,
         string $callbackMessage,
         string $operationId
-    )
-    {
+    ) {
         $callbackInfo = [
             'order_id' => $orderId,
             'operation_type' => $operationType,
@@ -62,9 +65,8 @@ class CallbackInfoManager
         return $callbackInfo;
     }
 
-    public function createEntryFromArray ($callbackData)
+    public function createEntryFromArray($callbackData)
     {
         $callbackData = json_decode($callbackData, true);
-
     }
 }

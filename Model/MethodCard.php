@@ -2,10 +2,11 @@
 
 namespace Ecommpay\Payments\Model;
 
+use Ecommpay\Payments\Block\Info\BaseInfoBlock;
 
 class MethodCard extends EcpAbstractMethod
 {
-    const PAYMENT_METHOD_NAME_CARD = 'ecommpay_card';
+    private const PAYMENT_METHOD_NAME_CARD = 'ecommpay_card';
 
     /**
      * Payment method code
@@ -17,7 +18,7 @@ class MethodCard extends EcpAbstractMethod
     /**
      * @var string
      */
-    protected $_infoBlockType = 'Ecommpay\Payments\Block\Info\BaseInfoBlock';
+    protected $_infoBlockType = BaseInfoBlock::class;
 
     /**
      * Availability option

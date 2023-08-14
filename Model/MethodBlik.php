@@ -2,10 +2,11 @@
 
 namespace Ecommpay\Payments\Model;
 
+use Ecommpay\Payments\Block\Info\BaseInfoBlock;
 
 class MethodBlik extends EcpAbstractMethod
 {
-    const PAYMENT_METHOD_NAME_BLIK = 'ecommpay_blik';
+    private const PAYMENT_METHOD_NAME_BLIK = 'ecommpay_blik';
 
     /**
      * Payment method code
@@ -17,7 +18,7 @@ class MethodBlik extends EcpAbstractMethod
     /**
      * @var string
      */
-    protected $_infoBlockType = 'Ecommpay\Payments\Block\Info\BaseInfoBlock';
+    protected $_infoBlockType = BaseInfoBlock::class;
 
     /**
      * Availability option

@@ -3,9 +3,9 @@
 <?php
     /** @var Ecommpay\Payments\Block\Adminhtml\Order\OrderView $block */
     $block->loadOrderData();
-    echo '<p><b>Operation type:</b> ' . $block->getOperationType() . '</p>';
-    echo '<p><b>Payment ID:</b> ' . $block->getPaymentId() . '</p>';
-    echo '<p><b>Payment method:</b> ' . $block->getPaymentMethod() . '</p>';
-    echo '<p><b>Payment status:</b> ' . $block->getPaymentStatus() . '</p>';
+    echo '<p><b>Operation type:</b> ' . $block->escapeHtml($block->getOperationType()) . '</p>';
+    echo '<p><b>Payment ID:</b> ' . $block->escapeHtml($block->getPaymentId()) . '</p>';
+    echo '<p><b>Payment method:</b> ' . $block->escapeHtml($block->getPaymentMethod()) . '</p>';
+    echo '<p><b>Payment status:</b> ' . $block->escapeHtml($block->getPaymentStatus()) . '</p>';
 ?>
 </div>

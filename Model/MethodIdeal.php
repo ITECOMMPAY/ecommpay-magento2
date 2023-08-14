@@ -2,10 +2,11 @@
 
 namespace Ecommpay\Payments\Model;
 
+use Ecommpay\Payments\Block\Info\BaseInfoBlock;
 
 class MethodIdeal extends EcpAbstractMethod
 {
-    const PAYMENT_METHOD_NAME_IDEAL = 'ecommpay_ideal';
+    private const PAYMENT_METHOD_NAME_IDEAL = 'ecommpay_ideal';
 
     /**
      * Payment method code
@@ -17,7 +18,7 @@ class MethodIdeal extends EcpAbstractMethod
     /**
      * @var string
      */
-    protected $_infoBlockType = 'Ecommpay\Payments\Block\Info\BaseInfoBlock';
+    protected $_infoBlockType = BaseInfoBlock::class;
 
     /**
      * Availability option

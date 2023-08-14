@@ -10,7 +10,6 @@ use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 
-
 class Index extends Action
 {
     /** @var Session */
@@ -32,16 +31,14 @@ class Index extends Action
     public function __construct(
         Context $context,
         Session $checkoutSession
-    )
-    {
+    ) {
         parent::__construct($context);
-        $this->checkoutSession = $checkoutSession;
-        $this->requestBuilder = new RequestBuilder();
-
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 
-        $this->request = $objectManager->get('\Magento\Framework\App\Request\Http');
-        $this->resultJsonFactory = $objectManager->get('\Magento\Framework\Controller\Result\JsonFactory');
+        $this->checkoutSession = $checkoutSession;
+        $this->request = $objectManager->get(Http::class);
+        $this->resultJsonFactory = $objectManager->get(JsonFactory::class);
+        $this->requestBuilder = new RequestBuilder($this->request);
     }
 
     /**

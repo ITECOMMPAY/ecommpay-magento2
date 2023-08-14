@@ -107,16 +107,16 @@ define(
             var url = paymentPageParams.paymentPageUrl;
             delete paymentPageParams.paymentPageUrl;
             let form =
-                $('<form/>', {
-                method: 'post',
+                $('<form>', {
+                    method: 'post',
                     action: url,
-                style: {
-                    display: 'none',
-                }
-            });
+                    style: {
+                        display: 'none',
+                    }
+                });
 
             $.each(paymentPageParams, function (key, value) {
-                form.append($('<input/>', {
+                form.append($('<input>', {
                     type: 'hidden',
                     name: key,
                     value: value
@@ -161,7 +161,25 @@ define(
                 success: function(response) {
                     if (response.success) {
                         var message = {"message":"epframe.embedded_mode.submit"};
-                        message.fields = {};
+
+                        var billingFields = [
+                            "billing_address", "billing_city", "billing_country", "billing_region", "billing_postal", "customer_first_name",
+                            "customer_last_name", "customer_phone", "customer_zip", "customer_address", "customer_city",
+                            "customer_country", "customer_email"
+                        ];
+                        var fieldsObject = {};
+                        Object.keys(response.data).forEach(key => {
+                            var name = key;
+                            if (billingFields.includes(key)) {
+                                name = "BillingInfo[" + name + "]";
+                            }
+                            fieldsObject[name] = response.data[key];
+                            if (key === 'billing_country') {
+                                fieldsObject["BillingInfo[country]"] = response.data[key];
+                            }
+                        });
+
+                        message.fields = fieldsObject;
                         message.from_another_domain = true;
                         window.postMessage(JSON.stringify(message));
                     } else {
@@ -217,8 +235,8 @@ define(
             }
         }, false);
 
-        function showErrors() {/* TODO */}
-        function clearErrors() {/* TODO */}
+        function showErrors() {}
+        function clearErrors() {}
 
         function redirect3DS(data) {
             var form = document.createElement('form');
@@ -274,7 +292,6 @@ define(
                         });
                         var errorsUnique = [... new Set(errors)]; //remove duplicated
                         console.log('validation errors', errorsUnique);
-                        /* TODO display errors on page */
                         showErrors();
                     } else {
                         showOverlayLoader();

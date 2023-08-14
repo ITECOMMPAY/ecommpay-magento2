@@ -2,10 +2,11 @@
 
 namespace Ecommpay\Payments\Model;
 
+use Ecommpay\Payments\Block\Info\BaseInfoBlock;
 
 class MethodKlarna extends EcpAbstractMethod
 {
-    const PAYMENT_METHOD_NAME_KLARNA = 'ecommpay_klarna';
+    private const PAYMENT_METHOD_NAME_KLARNA = 'ecommpay_klarna';
 
     /**
      * Payment method code
@@ -17,7 +18,7 @@ class MethodKlarna extends EcpAbstractMethod
     /**
      * @var string
      */
-    protected $_infoBlockType = 'Ecommpay\Payments\Block\Info\BaseInfoBlock';
+    protected $_infoBlockType = BaseInfoBlock::class;
 
     /**
      * Availability option

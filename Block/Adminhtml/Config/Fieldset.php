@@ -104,6 +104,7 @@ class Fieldset extends \Magento\Config\Block\System\Config\Form\Fieldset
     }
 
     /**
+     *
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
      * @return string
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)

@@ -5,6 +5,7 @@ namespace Ecommpay\Payments\Common;
 class EcpSigner
 {
     /**
+     *
      * @param array $params
      * @param array $ignoreParamKeys
      * @param int $currentLevel
@@ -15,10 +16,10 @@ class EcpSigner
     {
         $paramsToSign = [];
         foreach ($params as $key => $value) {
-            if (str_starts_with($key, "_")) {
+            if (substr($key, 0, 1) === "_") {
                 continue;
             }
-            if (is_null($value)){
+            if ($value === null) {
                 continue;
             }
             if ((in_array($key, $ignoreParamKeys) && $currentLevel == 1)) {
@@ -48,9 +49,10 @@ class EcpSigner
     }
 
     /**
+     *
      * @param array $data
-     * @return string
-     */
+     * @param array $ignoredParams
+     * @return string */
     public function getSignature(array $data, array $ignoredParams = [])
     {
         $paramsToSign = $this->getParamsToSign($data, $ignoredParams);
@@ -60,18 +62,18 @@ class EcpSigner
     }
 
     /**
+     *
      * @param array $paramsToSign
-     * @return string
-     */
+     * @return string */
     private function getStringToSign(array $paramsToSign)
     {
         return implode(';', $paramsToSign);
     }
 
     /**
+     *
      * @param array $data
-     * @return bool
-     */
+     * @return bool */
     public function checkSignature(array $data)
     {
         if (!array_key_exists('signature', $data)) {
@@ -81,5 +83,22 @@ class EcpSigner
         unset($data['signature']);
 
         return $this->getSignature($data) === $signature;
+    }
+
+    /**
+     * Unset null parameters
+     * @param array $data
+     * @return array
+     */
+    public function unsetNullParams(array $data) {
+        foreach ($data as $key => $value) {
+            switch (true) {
+                case $value === null:
+                case is_string($value) && strlen(trim($value)) <= 0:
+                    unset($data[$key]);
+                    break;
+            }
+        }
+        return $data;
     }
 }

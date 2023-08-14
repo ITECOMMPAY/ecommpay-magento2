@@ -4,28 +4,29 @@ namespace Ecommpay\Payments\Common;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
+use \Magento\Store\Model\StoreManagerInterface;
 
 class EcpConfigHelper
 {
-    const PLUGIN_VERSION = '1.1.0';
-    const ECOMMPAY_GATE_PROTOCOL = 'https';
-    const ECOMMPAY_GATE_HOST = 'api.ecommpay.com';
-    const GATE_REFUND_ENDPOINT_FORMAT = '%s://%s/v2/payment/%s/refund';
-    const ECOMMPAY_PP_HOST = 'paymentpage.ecommpay.com';
-    const TEST_PROJECT_ID = 112;
-    const TEST_SECRET_KEY = 'kHRhsQHHhOUHeD+rt4kgH7OZiwE=';
-    const TEST_PREFIX = 'test_';
-    const CMS_PREFIX = 'mag_';
-    const INTERFACE_TYPE_ID = 13;
+    public const PLUGIN_VERSION = '1.1.0';
+    private const ECOMMPAY_GATE_PROTOCOL = 'https';
+    private const ECOMMPAY_GATE_HOST = 'api.ecommpay.com';
+    private const GATE_REFUND_ENDPOINT_FORMAT = '%s://%s/v2/payment/%s/refund';
+    private const ECOMMPAY_PP_HOST = 'paymentpage.ecommpay.com';
+    private const TEST_PROJECT_ID = 112;
+    private const TEST_SECRET_KEY = 'kHRhsQHHhOUHeD+rt4kgH7OZiwE=';
+    public const TEST_PREFIX = 'test_';
+    public const CMS_PREFIX = 'mag_';
+    private const INTERFACE_TYPE_ID = 13;
 
-    const CONFIG_PATH_ENABLE_PLUGIN = 'payment/ecommpay_general/enable_plugin';
-    const CONFIG_PATH_IS_TEST = 'payment/ecommpay_general/testmode';
-    const CONFIG_PATH_SALT = 'payment/ecommpay_general/salt';
-    const CONFIG_PATH_PROJECT_ID = 'payment/ecommpay_general/project_id';
-    const CONFIG_PATH_DISPLAY_MODE = 'payment/ecommpay_card/display_mode';
-    const CONFIG_PATH_PP_LANGUAGE = 'payment/ecommpay_general/pp_language';
-    const CONFIG_PATH_ADDITIONAL_PARAMETERS = 'payment/ecommpay_general/additional_parameters';
-    const CONFIG_PATH_FORCE_METHOD_FOR_MORE_METHODS = 'payment/ecommpay_more_methods/force_payment_method';
+    private const CONFIG_PATH_ENABLE_PLUGIN = 'payment/ecommpay_general/enable_plugin';
+    private const CONFIG_PATH_IS_TEST = 'payment/ecommpay_general/testmode';
+    private const CONFIG_PATH_SALT = 'payment/ecommpay_general/salt';
+    private const CONFIG_PATH_PROJECT_ID = 'payment/ecommpay_general/project_id';
+    private const CONFIG_PATH_DISPLAY_MODE = 'payment/ecommpay_card/display_mode';
+    private const CONFIG_PATH_PP_LANGUAGE = 'payment/ecommpay_general/pp_language';
+    private const CONFIG_PATH_ADDITIONAL_PARAMETERS = 'payment/ecommpay_general/additional_parameters';
+    private const CONFIG_PATH_FORCE_METHOD_FOR_MORE_METHODS = 'payment/ecommpay_more_methods/force_payment_method';
 
     private static $instance;
 
@@ -41,7 +42,9 @@ class EcpConfigHelper
     /** @var bool | null */
     private $isTestMode;
 
-    /** @return EcpConfigHelper */
+    /**
+     *
+     * @return EcpConfigHelper */
     public static function getInstance()
     {
         if (!(self::$instance instanceof self)) {
@@ -72,7 +75,7 @@ class EcpConfigHelper
 
     public function isTestMode()
     {
-        if(is_null($this->isTestMode)) {
+        if ($this->isTestMode === null) {
             $this->isTestMode = (bool)($this->scopeConfig->getValue(self::CONFIG_PATH_IS_TEST, $this->storeScope));
         }
         return $this->isTestMode;
@@ -80,7 +83,7 @@ class EcpConfigHelper
 
     public function getSecretKeyDecrypted()
     {
-        if($this->isTestMode()) {
+        if ($this->isTestMode()) {
             return self::TEST_SECRET_KEY;
         }
         $saltEncrypted = $this->scopeConfig->getValue(self::CONFIG_PATH_SALT, $this->storeScope);
@@ -92,7 +95,7 @@ class EcpConfigHelper
         if ($this->isTestMode()) {
             return self::TEST_PROJECT_ID;
         } else {
-            return intval($this->scopeConfig->getValue(self::CONFIG_PATH_PROJECT_ID, $this->storeScope));
+            return (int)($this->scopeConfig->getValue(self::CONFIG_PATH_PROJECT_ID, $this->storeScope));
         }
     }
 
@@ -122,10 +125,10 @@ class EcpConfigHelper
     public function getMerchantCallbackUrl()
     {
         $objectManager =  \Magento\Framework\App\ObjectManager::getInstance();
-        $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+        $storeManager = $objectManager->get(StoreManagerInterface::class);
         $store = $storeManager->getStore();
         $baseUrl = $store->getBaseUrl();
-        if ($this->getProtocol() === "http"){
+        if ($this->getProtocol() === "http") {
             $baseUrl = str_replace("https", "http", $baseUrl);
         }
         return sprintf('%secommpay/endpayment/index', $baseUrl);
@@ -185,9 +188,10 @@ class EcpConfigHelper
     public static function priceMultiplyByCurrencyCode($price, $currencyCode)
     {
         $non_decimal_currencies = [
-            'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+            'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG',
+            'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
         ];
-        if(!in_array($currencyCode, $non_decimal_currencies)) {
+        if (!in_array($currencyCode, $non_decimal_currencies)) {
             $price = (int) round($price * 100);
         } else {
             $price = (int) $price;

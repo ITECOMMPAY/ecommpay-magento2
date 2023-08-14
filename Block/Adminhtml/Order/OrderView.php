@@ -18,16 +18,15 @@ class OrderView extends \Magento\Backend\Block\Template
     protected $_template = 'Ecommpay_Payments::order/order_view.phtml';
 
     public function __construct(
+        \Magento\Framework\Registry $registry,
         \Magento\Backend\Block\Template\Context $context,
-        array $data = [],
         ?JsonHelper $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null,
-        \Magento\Framework\Registry $registry
+        array $data = []
     ) {
         parent::__construct($context, $data, $jsonHelper, $directoryHelper);
         $this->registry = $registry;
     }
-
 
     public function loadOrderData()
     {
@@ -41,25 +40,33 @@ class OrderView extends \Magento\Backend\Block\Template
         $this->paymentStatus = $callbackData['payment_status'] ?? '';
     }
 
-    /** @return string */
+    /**
+     *
+     * @return string */
     public function getOperationType(): string
     {
         return $this->operationType;
     }
 
-    /** @return string */
+    /**
+     *
+     * @return string */
     public function getPaymentId(): string
     {
         return $this->paymentId;
     }
 
-    /** @return string */
+    /**
+     *
+     * @return string */
     public function getPaymentMethod(): string
     {
         return $this->paymentMethod;
     }
 
-    /** @return string */
+    /**
+     *
+     * @return string */
     public function getPaymentStatus(): string
     {
         return $this->paymentStatus;
@@ -68,15 +75,15 @@ class OrderView extends \Magento\Backend\Block\Template
     private function getOrderId()
     {
         $salesOrder = $this->registry->registry('sales_order');
-        if($salesOrder instanceof \Magento\Sales\Model\Order) {
+        if ($salesOrder instanceof \Magento\Sales\Model\Order) {
             return $salesOrder->getEntityId();
         }
         $currentOrder = $this->registry->registry('current_order');
-        if($currentOrder instanceof \Magento\Sales\Model\Order) {
+        if ($currentOrder instanceof \Magento\Sales\Model\Order) {
             return $currentOrder->getEntityId();
         }
         $order = $this->registry->registry('order');
-        if($order instanceof \Magento\Sales\Model\Order) {
+        if ($order instanceof \Magento\Sales\Model\Order) {
             return $order->getEntityId();
         }
         return null;

@@ -3,11 +3,14 @@
 namespace Ecommpay\Payments\Common;
 
 use Ecommpay\Payments\Signer;
-use Exception;
+use Ecommpay\Payments\Common\Exception\EcpGateRequestException;
+use Magento\Backend\Model\Auth\Session;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\HTTP\Client\Curl;
 
 class EcpRefundProcessor
 {
-    const REFUND_ID_CONTAINING_COMMENT = 'Refund request #%s was created';
+    public const REFUND_ID_CONTAINING_COMMENT = 'Refund request #%s was created';
 
     /** @var EcpSigner */
     private $signer;
@@ -15,64 +18,59 @@ class EcpRefundProcessor
     /** @var EcpConfigHelper */
     private $configHelper;
 
+    /** @var Curl */
+    private $curl;
+
     public function __construct()
     {
         $this->signer = new EcpSigner();
         $this->configHelper = EcpConfigHelper::getInstance();
+        $this->curl = new Curl();
     }
 
-
     /**
-     * @param string $orderId
+     *
+     * @param \Magento\Sales\Model\Order $order
      * @param float $amount
      * @param string $currency
-     * @param string $reason
+     * @param string $endpoint
      * @return EcpRefundResult
-     * @throws Exception
+     * @throws \Exception
      */
     public function processRefund(\Magento\Sales\Model\Order $order, $amount, $currency, $endpoint)
     {
         $objectManager =  \Magento\Framework\App\ObjectManager::getInstance();
-        $authSession = $objectManager->get('\Magento\Backend\Model\Auth\Session');
-
-        $projectId = $this->configHelper->getProjectId();
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->configHelper->getGateRefundEndpoint($endpoint));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
+        $authSession = $objectManager->get(Session::class);
+        $request = $objectManager->get(RequestInterface::class);
         $orderPaymentManager = new OrderPaymentManager();
-        $payment_id = $orderPaymentManager->getPaymentIdByOrderId($order->getEntityId());
 
         $post = [
             'general' => [
-                'project_id' => $projectId,
-                'payment_id' => $payment_id,
+                'project_id' => $this->configHelper->getProjectId(),
+                'payment_id' => $orderPaymentManager->getPaymentIdByOrderId($order->getEntityId()),
                 'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
             ],
             'customer' => [
-                'ip_address' => $_SERVER['REMOTE_ADDR'],
+                'ip_address' => $request->getServer('REMOTE_ADDR'),
             ],
             'payment' => [
                 'amount' => EcpConfigHelper::priceMultiplyByCurrencyCode($amount, $currency),
                 'currency' => $currency,
-                'description' => 'User ' . strval($authSession->getUser()->getId()) . ' create refund'
+                'description' => 'User ' . (string)($authSession->getUser()->getId()) . ' create refund'
             ],
             'interface_type' => $this->configHelper->getInterfaceTypeId()
         ];
 
         $post['general']['signature'] = $this->signer->getSignature($post);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post));
-        $out = curl_exec($ch);
-        $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        $this->curl->addHeader('Content-Type', 'application/json');
+        $this->curl->post($this->configHelper->getGateRefundEndpoint($endpoint), json_encode($post));
+        $response = $this->curl->getBody();
+        $httpStatus = $this->curl->getStatus();
 
-        $data = json_decode($out, true);
+        $data = json_decode($response, true);
         if ($data === null) {
-            throw new Exception('Malformed response');
+            throw new EcpGateRequestException('Malformed response.' . $response);
         }
 
         if ($httpStatus != 200) {
