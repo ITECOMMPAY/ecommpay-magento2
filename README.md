@@ -34,23 +34,38 @@ Enjoy industry-leading support with an average response time of 15 minutes. We a
 Receive weekly or even more frequent settlements in EUR, USD or GBP.
 
 ## Installation
-1. Copy the 'Ecommpay' folder to the '/app/code/' directory on your Magento server. Ensure that the final path appears as 'app/code/Ecommpay/Payments'.
-
-2. Execute the following commands in your Magento server's command line interface:
+### From the marketplace (recommended)
+1. Go to your Magento2 application folder and run this command
 ```
-php bin/magento indexer:reindex 
+composer require ecommpay/module-payments
+```
+2. At this moment you may be asked to submit your access keys. How to get keys see [Get your authentication keys](https://devdocs.magento.com/guides/v2.3/install-gde/prereq/connect-auth.html).
+3. Run update Magento commands
+```
 php bin/magento setup:upgrade
-php bin/magento setup:di:compile
 php bin/magento cache:flush
 php bin/magento cache:clean
+php bin/magento setup:di:compile
 php bin/magento setup:static-content:deploy
 ```
 
-3. In your Magento Admin Panel, navigate to Stores -> Configuration -> Sales -> Payment Methods -> ECOMMPAY.
+### From zip archive
+1. Download the zip archive with the latest version of the ecommpay plugin from [github](https://github.com/ITECOMMPAY/ecommpay-magento2/releases).
+2. Copy the 'Ecommpay' folder to the '/app/code/' directory on your Magento server. Ensure that the final path appears as 'app/code/Ecommpay/Payments'.
+3. Execute the following commands in your Magento server's command line interface:
+```
+php bin/magento indexer:reindex 
+php bin/magento setup:upgrade
+php bin/magento cache:flush
+php bin/magento cache:clean
+php bin/magento setup:di:compile
+php bin/magento setup:static-content:deploy
+```
 
-4. Fill in the "Project ID" and "Secret key" fields in the "General Settings" section, and save the settings.
-
-5. You're now ready to start using ECOMMPAY with Magento.
+## Setting up
+1. In your Magento Admin Panel, navigate to _Stores -> Configuration -> Sales -> Payment Methods -> ECOMMPAY_.
+2. Fill in the "Project ID" and "Secret key" fields in the "General Settings" section, and save the settings.
+3. You're now ready to start using ECOMMPAY with Magento.
 
 ## How do I start?
 1. Download and install our free Magento plugin. It’s quick and easy. Feel free to test it any time
@@ -64,6 +79,8 @@ General:
 1. Magento >= 2.2
 
 ### Changelog
+#### 1.1.2
+* Patch: Change the signature level for Ecommpay API requests
 #### 1.1.1
 * Minor bug resolutions and code refactoring.
 #### 1.1.0

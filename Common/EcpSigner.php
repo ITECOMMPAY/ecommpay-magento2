@@ -12,8 +12,12 @@ class EcpSigner
      * @param string $prefix
      * @return array
      */
-    private function getParamsToSign(array $params, array $ignoreParamKeys = [], $currentLevel = 1, $prefix = '')
-    {
+    private function getParamsToSign(
+        array $params,
+        array $ignoreParamKeys = [],
+        string $prefix = '',
+        bool $sort = true
+    ): array {
         $paramsToSign = [];
         foreach ($params as $key => $value) {
             if (substr($key, 0, 1) === "_") {
@@ -22,27 +26,24 @@ class EcpSigner
             if ($value === null) {
                 continue;
             }
-            if ((in_array($key, $ignoreParamKeys) && $currentLevel == 1)) {
+            if (in_array($key, $ignoreParamKeys, true)) {
                 continue;
             }
             $paramKey = ($prefix ? $prefix . ':' : '') . $key;
             if (is_array($value)) {
-                if ($currentLevel >= 3) {
-                    $paramsToSign[$paramKey] = (string)$paramKey . ':';
-                } else {
-                    $subArray = $this->getParamsToSign($value, $ignoreParamKeys, $currentLevel + 1, $paramKey);
-                    $paramsToSign = array_merge($paramsToSign, $subArray);
-                }
+                $subArray = $this->getParamsToSign($value, $ignoreParamKeys, $paramKey, false);
+                $paramsToSign = array_merge($paramsToSign, $subArray);
             } else {
                 if (is_bool($value)) {
                     $value = $value ? '1' : '0';
                 } else {
                     $value = (string)$value;
                 }
-                $paramsToSign[$paramKey] = (string)$paramKey . ':' . $value;
+                $paramsToSign[$paramKey] = $paramKey . ':' . $value;
             }
         }
-        if ($currentLevel == 1) {
+
+        if ($sort) {
             ksort($paramsToSign, SORT_NATURAL);
         }
         return $paramsToSign;

@@ -1,11 +1,11 @@
 {
   "name": "ecommpay/module-payments",
-  "description": "Accept payments with a complete payment platform for your business.",
+  "description": "Ecommpay official plugin for Magento2",
   "require": {
     "php": ">=7.1"
   },
   "type": "magento2-module",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "license": ["GPL-2.0"],
   "autoload": {
     "files": ["registration.php"],
