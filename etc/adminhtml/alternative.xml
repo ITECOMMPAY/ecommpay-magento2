@@ -149,6 +149,43 @@
 
             <field id="model"></field>
         </group>
+        <group id="ecommpay_paypal_paylater" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <label>Ecommpay Paypal PayLater</label>
+            <field id="ecommpay_paypal_paylater_active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Enabled</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_paypal_paylater/active</config_path>
+            </field>
+
+            <field id="ecommpay_paypal_paylater_title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Title</label>
+                <config_path>payment/ecommpay_paypal_paylater/title</config_path>
+            </field>
+
+            <field id="ecommpay_paypal_paylater_show_description" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Show descripton</label>
+                <comment><![CDATA[Display the payment method description which user sees during checkout]]></comment>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_paypal_paylater/show_description</config_path>
+            </field>
+
+            <field id="ecommpay_paypal_paylater_description" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Description</label>
+                <config_path>payment/ecommpay_paypal_paylater/description</config_path>
+                <depends>
+                    <field id="ecommpay_paypal_paylater_show_description">1</field>
+                </depends>
+            </field>
+
+            <field id="ecommpay_paypal_paylater_sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Sort Order</label>
+                <frontend_class>validate-number</frontend_class>
+                <config_path>payment/ecommpay_paypal_paylater/sort_order</config_path>
+            </field>
+
+            <field id="model"></field>
+        </group>
         <group id="ecommpay_sofort" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
 
             <label>Sofort</label>

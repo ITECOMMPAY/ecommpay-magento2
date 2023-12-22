@@ -56,6 +56,10 @@ define(
                     component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_paypal'
                 },
                 {
+                    type: 'ecommpay_paypal_paylater',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_paypal_paylater'
+                },
+                {
                     type: 'ecommpay_sofort',
                     component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_sofort'
                 },

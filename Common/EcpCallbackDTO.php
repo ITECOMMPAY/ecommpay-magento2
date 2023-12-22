@@ -76,7 +76,7 @@ class EcpCallbackDTO
         $paymentMethod = $callbackArray['payment']['method'] ?? null;
         $operationType = $callbackArray['operation']['type'];
         $paymentStatus = $callbackArray['payment']['status'];
-        $operationId = $callbackArray['operation']['id'];
+        $operationId = $callbackArray['operation']['id'] ?? 0;
         $operationStatus = $callbackArray['operation']['status'];
         $requestId = $callbackArray['operation']['request_id'];
 

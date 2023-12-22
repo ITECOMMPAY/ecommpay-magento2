@@ -225,23 +225,28 @@ class RequestBuilder
             'paypal-wallet'
         ];
         $methodParam = $this->request->getParam('method');
-        if (!empty($methodParam)) {
-            if ($methodParam === 'open_banking') {
-                $urlData['force_payment_group'] = 'openbanking';
-            } elseif (in_array($methodParam, $forcePaymentMethods)) {
-                $urlData['force_payment_method'] = $methodParam;
-            } elseif ($methodParam === 'more_methods') {
-                $forceMethodForMoreMethods = $this->configHelper->getForceMethodForMoreMethods();
-                if (!empty($forceMethodForMoreMethods)) {
-                    $urlData['force_payment_method'] = $forceMethodForMoreMethods;
-                }
+        if (empty($methodParam)) {
+            return $urlData;
+        }
+
+        if ($methodParam === 'open_banking') {
+            $urlData['force_payment_group'] = 'openbanking';
+        } elseif ($methodParam === 'paypal-paylater') {
+            $urlData['force_payment_method'] = 'paypal-wallet';
+            $urlData['payment_methods_options'] = "{\"submethod_code\": \"paylater\"}";
+        } elseif (in_array($methodParam, $forcePaymentMethods)) {
+            $urlData['force_payment_method'] = $methodParam;
+        } elseif ($methodParam === 'more_methods') {
+            $forceMethodForMoreMethods = $this->configHelper->getForceMethodForMoreMethods();
+            if (!empty($forceMethodForMoreMethods)) {
+                $urlData['force_payment_method'] = $forceMethodForMoreMethods;
             }
-            if ($methodParam === 'klarna') {
-                $urlData['receipt_data'] = $this->getReceiptData($order);
-                $countryId = $order->getBillingAddress()->getCountryId();
-                if ($countryId) {
-                    $urlData['customer_country'] = $countryId;
-                }
+        }
+        if ($methodParam === 'klarna') {
+            $urlData['receipt_data'] = $this->getReceiptData($order);
+            $countryId = $order->getBillingAddress()->getCountryId();
+            if ($countryId) {
+                $urlData['customer_country'] = $countryId;
             }
         }
         return $urlData;

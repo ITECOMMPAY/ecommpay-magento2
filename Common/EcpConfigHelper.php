@@ -8,7 +8,7 @@ use \Magento\Store\Model\StoreManagerInterface;
 
 class EcpConfigHelper
 {
-    public const PLUGIN_VERSION = '1.1.2';
+    public const PLUGIN_VERSION = '1.1.3';
     private const ECOMMPAY_GATE_PROTOCOL = 'https';
     private const ECOMMPAY_GATE_HOST = 'api.ecommpay.com';
     private const GATE_REFUND_ENDPOINT_FORMAT = '%s://%s/v2/payment/%s/refund';
@@ -165,6 +165,7 @@ class EcpConfigHelper
             'ecommpay_googlepay',
             'ecommpay_open_banking',
             'ecommpay_paypal',
+            'ecommpay_paypal_paylater',
             'ecommpay_sofort',
             'ecommpay_ideal',
             'ecommpay_klarna',

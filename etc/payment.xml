@@ -8,6 +8,9 @@
         <method name="ecommpay_paypal">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
+        <method name="ecommpay_paypal_paylater">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
         <method name="ecommpay_applepay">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
