@@ -39,6 +39,8 @@ class RequestBuilder
 
     protected $magentoVersion;
 
+    protected $request;
+
     /**
      * Signer constructor.
      */
@@ -222,7 +224,11 @@ class RequestBuilder
             'giropay',
             'ideal',
             'klarna',
-            'paypal-wallet'
+            'paypal-wallet',
+            'neteller',
+            'skrill',
+            'bancontact',
+            'multibanco',
         ];
         $methodParam = $this->request->getParam('method');
         if (empty($methodParam)) {

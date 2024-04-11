@@ -371,6 +371,154 @@
 
             <field id="model"></field>
         </group>
+        <group id="ecommpay_neteller" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <label>Neteller</label>
+            <field id="ecommpay_neteller_active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Enabled</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_neteller/active</config_path>
+            </field>
+
+            <field id="ecommpay_neteller_title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Title</label>
+                <config_path>payment/ecommpay_neteller/title</config_path>
+            </field>
+
+            <field id="ecommpay_neteller_show_description" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Show descripton</label>
+                <comment><![CDATA[Display the payment method description which user sees during checkout]]></comment>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_neteller/show_description</config_path>
+            </field>
+
+            <field id="ecommpay_neteller_description" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Description</label>
+                <config_path>payment/ecommpay_neteller/description</config_path>
+                <depends>
+                    <field id="ecommpay_neteller_show_description">1</field>
+                </depends>
+            </field>
+
+            <field id="ecommpay_neteller_sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Sort Order</label>
+                <frontend_class>validate-number</frontend_class>
+                <config_path>payment/ecommpay_neteller/sort_order</config_path>
+            </field>
+
+            <field id="model"></field>
+        </group>
+        <group id="ecommpay_skrill" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <label>Skrill</label>
+            <field id="ecommpay_skrill_active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Enabled</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_skrill/active</config_path>
+            </field>
+
+            <field id="ecommpay_skrill_title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Title</label>
+                <config_path>payment/ecommpay_skrill/title</config_path>
+            </field>
+
+            <field id="ecommpay_skrill_show_description" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Show descripton</label>
+                <comment><![CDATA[Display the payment method description which user sees during checkout]]></comment>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_skrill/show_description</config_path>
+            </field>
+
+            <field id="ecommpay_skrill_description" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Description</label>
+                <config_path>payment/ecommpay_skrill/description</config_path>
+                <depends>
+                    <field id="ecommpay_skrill_show_description">1</field>
+                </depends>
+            </field>
+
+            <field id="ecommpay_skrill_sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Sort Order</label>
+                <frontend_class>validate-number</frontend_class>
+                <config_path>payment/ecommpay_skrill/sort_order</config_path>
+            </field>
+
+            <field id="model"></field>
+        </group>
+        <group id="ecommpay_bancontact" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <label>Bancontact</label>
+            <field id="ecommpay_bancontact_active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Enabled</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_bancontact/active</config_path>
+            </field>
+
+            <field id="ecommpay_bancontact_title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Title</label>
+                <config_path>payment/ecommpay_bancontact/title</config_path>
+            </field>
+
+            <field id="ecommpay_bancontact_show_description" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Show descripton</label>
+                <comment><![CDATA[Display the payment method description which user sees during checkout]]></comment>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_bancontact/show_description</config_path>
+            </field>
+
+            <field id="ecommpay_bancontact_description" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Description</label>
+                <config_path>payment/ecommpay_bancontact/description</config_path>
+                <depends>
+                    <field id="ecommpay_bancontact_show_description">1</field>
+                </depends>
+            </field>
+
+            <field id="ecommpay_bancontact_sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Sort Order</label>
+                <frontend_class>validate-number</frontend_class>
+                <config_path>payment/ecommpay_bancontact/sort_order</config_path>
+            </field>
+
+            <field id="model"></field>
+        </group>
+        <group id="ecommpay_multibanco" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <label>Multibanco</label>
+            <field id="ecommpay_multibanco_active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Enabled</label>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_multibanco/active</config_path>
+            </field>
+
+            <field id="ecommpay_multibanco_title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Title</label>
+                <config_path>payment/ecommpay_multibanco/title</config_path>
+            </field>
+
+            <field id="ecommpay_multibanco_show_description" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <label>Show descripton</label>
+                <comment><![CDATA[Display the payment method description which user sees during checkout]]></comment>
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                <config_path>payment/ecommpay_multibanco/show_description</config_path>
+            </field>
+
+            <field id="ecommpay_multibanco_description" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <label>Description</label>
+                <config_path>payment/ecommpay_multibanco/description</config_path>
+                <depends>
+                    <field id="ecommpay_multibanco_show_description">1</field>
+                </depends>
+            </field>
+
+            <field id="ecommpay_multibanco_sort_order" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Sort Order</label>
+                <frontend_class>validate-number</frontend_class>
+                <config_path>payment/ecommpay_multibanco/sort_order</config_path>
+            </field>
+
+            <field id="model"></field>
+        </group>
         <group id="ecommpay_more_methods" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
 
             <label>More payment methods via Ecommpay</label>

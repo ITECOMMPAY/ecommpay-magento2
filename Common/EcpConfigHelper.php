@@ -8,7 +8,7 @@ use \Magento\Store\Model\StoreManagerInterface;
 
 class EcpConfigHelper
 {
-    public const PLUGIN_VERSION = '1.1.3';
+    public const PLUGIN_VERSION = '1.2.0';
     private const ECOMMPAY_GATE_PROTOCOL = 'https';
     private const ECOMMPAY_GATE_HOST = 'api.ecommpay.com';
     private const GATE_REFUND_ENDPOINT_FORMAT = '%s://%s/v2/payment/%s/refund';
@@ -171,6 +171,10 @@ class EcpConfigHelper
             'ecommpay_klarna',
             'ecommpay_blik',
             'ecommpay_giropay',
+            'ecommpay_neteller',
+            'ecommpay_skrill',
+            'ecommpay_bancontact',
+            'ecommpay_multibanco',
             'ecommpay_more_methods'
         ];
         foreach ($methods as $method) {

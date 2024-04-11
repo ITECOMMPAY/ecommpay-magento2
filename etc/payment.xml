@@ -35,6 +35,18 @@
         <method name="ecommpay_klarna">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
+        <method name="ecommpay_neteller">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="ecommpay_skrill">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="ecommpay_bancontact">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="ecommpay_multibanco">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
         <method name="ecommpay_more_methods">
             <allow_multiple_address>1</allow_multiple_address>
         </method>

@@ -56,6 +56,9 @@ class Index extends Action implements CsrfAwareActionInterface
     /** @var OrderPaymentManager */
     protected $orderPaymentManager;
 
+    /** @var RequestInterface */
+    protected $request;
+
     /**
      *
      * @param Context $context

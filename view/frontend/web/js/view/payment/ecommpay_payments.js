@@ -80,6 +80,22 @@ define(
                     component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_giropay'
                 },
                 {
+                    type: 'ecommpay_neteller',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_neteller'
+                },
+                {
+                    type: 'ecommpay_skrill',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_skrill'
+                },
+                {
+                    type: 'ecommpay_bancontact',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_bancontact'
+                },
+                {
+                    type: 'ecommpay_multibanco',
+                    component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_multibanco'
+                },
+                {
                     type: 'ecommpay_more_methods',
                     component: 'Ecommpay_Payments/js/view/payment/method-renderer/ecommpay_more_methods'
                 }

@@ -2,10 +2,11 @@
   "name": "ecommpay/module-payments",
   "description": "Ecommpay official plugin for Magento2",
   "require": {
-    "php": ">=7.1"
+    "php": ">=7.1",
+    "ext-json": "*"
   },
   "type": "magento2-module",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "license": ["GPL-2.0"],
   "autoload": {
     "files": ["registration.php"],

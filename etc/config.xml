@@ -114,6 +114,42 @@
                 <model>Ecommpay\Payments\Model\MethodGiropay</model>
                 <sort_order>12</sort_order>
             </ecommpay_giropay>
+            <ecommpay_neteller>
+                <active>0</active>
+                <title>Neteller</title>
+                <show_description>1</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodNeteller</model>
+                <sort_order>13</sort_order>
+            </ecommpay_neteller>
+            <ecommpay_skrill>
+                <active>0</active>
+                <title>Skrill</title>
+                <show_description>1</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodSkrill</model>
+                <sort_order>14</sort_order>
+            </ecommpay_skrill>
+            <ecommpay_bancontact>
+                <active>0</active>
+                <title>Bancontact</title>
+                <show_description>1</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodBancontact</model>
+                <sort_order>15</sort_order>
+            </ecommpay_bancontact>
+            <ecommpay_multibanco>
+                <active>0</active>
+                <title>Multibanco</title>
+                <show_description>1</show_description>
+                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <payment_action>true</payment_action>
+                <model>Ecommpay\Payments\Model\MethodMultibanco</model>
+                <sort_order>16</sort_order>
+            </ecommpay_multibanco>
             <ecommpay_more_methods>
                 <active>0</active>
                 <title>More payment methods</title>
@@ -122,7 +158,7 @@
                 <payment_action>true</payment_action>
                 <force_payment_method></force_payment_method>
                 <model>Ecommpay\Payments\Model\MethodMoreMethods</model>
-                <sort_order>13</sort_order>
+                <sort_order>17</sort_order>
             </ecommpay_more_methods>
         </payment>
     </default>
