@@ -13,16 +13,35 @@
                 <sort_order>1</sort_order>
                 <pp_language>default</pp_language>
                 <additional_parameters></additional_parameters>
+                <payment_action_type>authorize_capture</payment_action_type>
+                <is_gateway>0</is_gateway>
+                <group>ecommpay_group</group>
             </ecommpay_general>
             <ecommpay_card>
                 <active>0</active>
                 <title>Card payments</title>
                 <show_description>0</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
                 <display_mode>embedded</display_mode>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodCard</model>
+                <model>MethodCard</model>
                 <sort_order>2</sort_order>
+                <force_payment_method>card</force_payment_method>
+                <methodEndpoint>card</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <can_capture_once>1</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>1</can_void>
+                <can_cancel>1</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_card>
             <ecommpay_applepay>
                 <active>0</active>
@@ -30,8 +49,24 @@
                 <show_description>1</show_description>
                 <description>Pay with ApplePay</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodApplepay</model>
+                <model>MethodApplePay</model>
                 <sort_order>3</sort_order>
+                <force_payment_method>apple_pay_core</force_payment_method>
+                <methodEndpoint>applepay</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <can_capture_once>1</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>1</can_void>
+                <can_cancel>1</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_applepay>
             <ecommpay_googlepay>
                 <active>0</active>
@@ -39,8 +74,24 @@
                 <show_description>1</show_description>
                 <description>Pay with GooglePay.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodGooglepay</model>
+                <model>MethodGooglePay</model>
                 <sort_order>4</sort_order>
+                <force_payment_method>google_pay_host</force_payment_method>
+                <methodEndpoint>googlepay</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <can_capture_once>1</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>1</can_void>
+                <can_cancel>1</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_googlepay>
             <ecommpay_open_banking>
                 <active>0</active>
@@ -48,8 +99,23 @@
                 <show_description>1</show_description>
                 <description>You will be redirected to your bank.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodOpenBanking</model>
+                <model>MethodOpenBanking</model>
+                <force_payment_group>openbanking</force_payment_group>
                 <sort_order>5</sort_order>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>0</can_refund>
+                <can_refund_partial_per_invoice>0</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_open_banking>
             <ecommpay_paypal>
                 <active>0</active>
@@ -57,8 +123,24 @@
                 <show_description>1</show_description>
                 <description>You will be redirected to PayPal.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodPaypal</model>
+                <model>MethodPayPal</model>
+                <force_payment_method>paypal-wallet</force_payment_method>
                 <sort_order>6</sort_order>
+                <methodEndpoint>wallet/paypal</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_paypal>
             <ecommpay_paypal_paylater>
                 <active>0</active>
@@ -66,8 +148,25 @@
                 <show_description>1</show_description>
                 <description>You will be redirected to PayPal to finish your operation.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodPaypalPayLater</model>
+                <model>MethodPayPalPayLater</model>
                 <sort_order>7</sort_order>
+                <force_payment_method>paypal-wallet</force_payment_method>
+                <payment_methods_options>{\"submethod_code\": \"paylater\"}</payment_methods_options>
+                <methodEndpoint>wallet/paypal</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_paypal_paylater>
             <ecommpay_sofort>
                 <active>0</active>
@@ -75,8 +174,23 @@
                 <show_description>1</show_description>
                 <description>You will be redirected to your bank.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodSofort</model>
+                <model>MethodSofort</model>
                 <sort_order>8</sort_order>
+                <force_payment_method>sofort</force_payment_method>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>0</can_refund>
+                <can_refund_partial_per_invoice>0</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_sofort>
             <ecommpay_ideal>
                 <active>0</active>
@@ -84,8 +198,24 @@
                 <show_description>1</show_description>
                 <description>You will be redirected to iDEAL.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodIdeal</model>
+                <model>MethodIdeal</model>
                 <sort_order>9</sort_order>
+                <force_payment_method>ideal</force_payment_method>
+                <methodEndpoint>online-banking/ideal</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_ideal>
             <ecommpay_klarna>
                 <active>0</active>
@@ -93,8 +223,24 @@
                 <show_description>1</show_description>
                 <description>You will be redirected to Klarna.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodKlarna</model>
+                <model>MethodKlarna</model>
                 <sort_order>10</sort_order>
+                <force_payment_method>klarna</force_payment_method>
+                <methodEndpoint>bank-transfer/klarna</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_klarna>
             <ecommpay_blik>
                 <active>0</active>
@@ -102,8 +248,24 @@
                 <show_description>1</show_description>
                 <description>You will be redirected to finish your Blik payment.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodBlik</model>
+                <model>MethodBlik</model>
                 <sort_order>11</sort_order>
+                <force_payment_method>blik</force_payment_method>
+                <methodEndpoint>blik</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_blik>
             <ecommpay_giropay>
                 <active>0</active>
@@ -111,44 +273,121 @@
                 <show_description>1</show_description>
                 <description>You will be redirected to Giropay.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodGiropay</model>
+                <model>MethodGiropay</model>
                 <sort_order>12</sort_order>
+                <force_payment_method>giropay</force_payment_method>
+                <methodEndpoint>online-banking/giropay</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_giropay>
             <ecommpay_neteller>
                 <active>0</active>
                 <title>Neteller</title>
                 <show_description>1</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodNeteller</model>
+                <model>MethodNeteller</model>
                 <sort_order>13</sort_order>
+                <force_payment_method>neteller</force_payment_method>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>0</can_refund>
+                <can_refund_partial_per_invoice>0</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_neteller>
             <ecommpay_skrill>
                 <active>0</active>
                 <title>Skrill</title>
                 <show_description>1</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodSkrill</model>
+                <model>MethodSkrill</model>
                 <sort_order>14</sort_order>
+                <force_payment_method>skrill</force_payment_method>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>0</can_refund>
+                <can_refund_partial_per_invoice>0</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_skrill>
             <ecommpay_bancontact>
                 <active>0</active>
                 <title>Bancontact</title>
                 <show_description>1</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodBancontact</model>
+                <model>MethodBancontact</model>
                 <sort_order>15</sort_order>
+                <force_payment_method>bancontact</force_payment_method>
+                <methodEndpoint>bancontact</methodEndpoint>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_bancontact>
             <ecommpay_multibanco>
                 <active>0</active>
                 <title>Multibanco</title>
                 <show_description>1</show_description>
-                <description>You will be redirected to ECommPay payment page. All data you enter in that page are secured.</description>
+                <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
                 <payment_action>true</payment_action>
-                <model>Ecommpay\Payments\Model\MethodMultibanco</model>
+                <model>MethodMultibanco</model>
                 <sort_order>16</sort_order>
+                <force_payment_method>multibanco</force_payment_method>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>0</can_refund>
+                <can_refund_partial_per_invoice>0</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_multibanco>
             <ecommpay_more_methods>
                 <active>0</active>
@@ -156,9 +395,23 @@
                 <show_description>1</show_description>
                 <description>Payment form with additional payment methods.</description>
                 <payment_action>true</payment_action>
-                <force_payment_method></force_payment_method>
-                <model>Ecommpay\Payments\Model\MethodMoreMethods</model>
+                <model>MethodMoreMethods</model>
                 <sort_order>17</sort_order>
+                <force_payment_method>card</force_payment_method>
+                <is_gateway>1</is_gateway>
+                <can_authorize>0</can_authorize>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <can_capture_once>0</can_capture_once>
+                <can_refund>0</can_refund>
+                <can_refund_partial_per_invoice>0</can_refund_partial_per_invoice>
+                <can_void>0</can_void>
+                <can_cancel>0</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
+                <group>ecommpay_group</group>
             </ecommpay_more_methods>
         </payment>
     </default>

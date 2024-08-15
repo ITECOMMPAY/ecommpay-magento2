@@ -2,9 +2,11 @@
 
 namespace Ecommpay\Payments\Model\Config;
 
-class DisplayMode implements \Magento\Framework\Option\ArrayInterface
+use Magento\Framework\Option\ArrayInterface;
+
+class DisplayMode implements ArrayInterface
 {
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'redirect', 'label' => __('Redirect')],

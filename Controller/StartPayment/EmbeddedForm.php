@@ -14,32 +14,26 @@ use Magento\Sales\Model\Order;
 
 class EmbeddedForm extends Action
 {
-    /** @var Session */
-    protected $checkoutSession;
+    protected Session $checkoutSession;
+    protected RequestBuilder $requestBuilder;
+    protected Http $request;
+    protected JsonFactory $resultJsonFactory;
+    protected OrderPaymentManager $orderPaymentManager;
 
-    /** @var RequestBuilder */
-    protected $requestBuilder;
-
-    /** @var Http */
-    protected $request;
-
-    /** @var JsonFactory */
-    protected $resultJsonFactory;
-
-    /**
-     * @param Context $context
-     * @param Session $checkoutSession
-     */
     public function __construct(
         Context $context,
-        Session $checkoutSession
+        Session $checkoutSession,
+        RequestBuilder $requestBuilder,
+        Http $http,
+        JsonFactory $jsonFactory,
+        OrderPaymentManager $orderPaymentManager
     ) {
         parent::__construct($context);
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $this->request = $objectManager->get(Http::class);
-        $this->resultJsonFactory = $objectManager->get(JsonFactory::class);
-        $this->requestBuilder = new RequestBuilder($this->request);
+        $this->request = $http;
+        $this->resultJsonFactory = $jsonFactory;
+        $this->requestBuilder = $requestBuilder;
         $this->checkoutSession = $checkoutSession;
+        $this->orderPaymentManager = $orderPaymentManager;
     }
 
     /**
@@ -72,7 +66,6 @@ class EmbeddedForm extends Action
 
     private function process(): array
     {
-        $orderPaymentManager = new OrderPaymentManager();
         $paymentId = $this->request->get('payment_id', null);
         $order = $this->checkoutSession->getLastRealOrder();
         if (!$paymentId) {
@@ -81,11 +74,11 @@ class EmbeddedForm extends Action
         if (!($order instanceof  Order)) {
             return ['success' => false, 'error' => 'Order not found in session'];
         }
-        $orderPaymentManager->insert($order->getEntityId(), $paymentId);
+        $this->orderPaymentManager->insert($order->getEntityId(), $paymentId);
         
-        $order->setState(Order::STATE_PENDING_PAYMENT, true);
+        $order->setState(Order::STATE_PENDING_PAYMENT);
         $order->setStatus(Order::STATE_PENDING_PAYMENT);
-        $order->addStatusToHistory($order->getStatus(), 'Order pending payment by ecommpay');
+        $order->addStatusToHistory($order->getStatus(), 'The customer made a payment. Waiting for response from payment platform');
         $order->save();
         
         $billingInfo = $this->requestBuilder->getBillingDataFromOrder($order);
@@ -96,10 +89,8 @@ class EmbeddedForm extends Action
 
     private function checkCartAmount($queryAmount): array
     {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $checkoutSession = $objectManager->get(Session::class);
-        $grandTotal = $checkoutSession->getQuote()->getGrandTotal();
-        $currencyCode = $checkoutSession->getQuote()->getQuoteCurrencyCode();
+        $grandTotal = $this->checkoutSession->getQuote()->getGrandTotal();
+        $currencyCode = $this->checkoutSession->getQuote()->getQuoteCurrencyCode();
         $cartPaymentAmount = EcpConfigHelper::priceMultiplyByCurrencyCode($grandTotal, $currencyCode);
         $cartPaymentAmount = (int)$cartPaymentAmount;
         $queryAmount = (int)$queryAmount;

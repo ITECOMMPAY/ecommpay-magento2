@@ -12,33 +12,23 @@ use Magento\Framework\Controller\Result\JsonFactory;
 
 class Index extends Action
 {
-    /** @var Session */
-    protected $checkoutSession;
+    protected Session $checkoutSession;
+    protected RequestBuilder $requestBuilder;
+    protected Http $request;
+    protected JsonFactory $resultJsonFactory;
 
-    /** @var RequestBuilder */
-    protected $requestBuilder;
-
-    /** @var Http */
-    protected $request;
-
-    /** @var JsonFactory */
-    protected $resultJsonFactory;
-
-    /**
-     * @param Context $context
-     * @param Session $checkoutSession
-     */
     public function __construct(
         Context $context,
-        Session $checkoutSession
+        Session $checkoutSession,
+        RequestBuilder $requestBuilder,
+        Http $http,
+        JsonFactory $jsonFactory
     ) {
         parent::__construct($context);
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-
+        $this->request = $http;
+        $this->resultJsonFactory = $jsonFactory;
+        $this->requestBuilder = $requestBuilder;
         $this->checkoutSession = $checkoutSession;
-        $this->request = $objectManager->get(Http::class);
-        $this->resultJsonFactory = $objectManager->get(JsonFactory::class);
-        $this->requestBuilder = new RequestBuilder($this->request);
     }
 
     /**
@@ -51,9 +41,9 @@ class Index extends Action
         /** @var \Magento\Sales\Model\Order $order */
         $order = $this->checkoutSession->getLastRealOrder();
 
-        $order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT, true);
+        $order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
         $order->setStatus(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
-        $order->addStatusToHistory($order->getStatus(), 'Order pending payment by ecommpay');
+        $order->addStatusToHistory($order->getStatus(), 'The customer opened the payment page. Waiting for the customer to make the payment');
         $order->save();
 
         $paymentPageParams = $this->requestBuilder->getPaymentPageParams($order);

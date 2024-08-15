@@ -2,71 +2,67 @@
 
 namespace Ecommpay\Payments\Common;
 
+use Exception;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Adapter\AdapterInterface;
+use Ecommpay\Payments\Common\EcpCallbackDTO;
 
 class CallbackInfoManager
 {
     private const TABLE_NAME = 'ecp_callback_info';
-    /** @var \Magento\Framework\DB\Adapter\AdapterInterface  */
-    private $connection;
-    private $tableName;
-    public function __construct()
+
+    private AdapterInterface $connection;
+    private string $resourceTableName;
+
+    public function __construct(ResourceConnection $resourceConnection)
     {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        /**
-         *
-         * @var ResourceConnection $resource */
-        $resource = $objectManager->get(ResourceConnection::class);
-        $this->tableName = $resource->getTableName(self::TABLE_NAME);
-        $this->connection = $resource->getConnection();
+        $this->resourceTableName = $resourceConnection->getTableName(self::TABLE_NAME);
+        $this->connection = $resourceConnection->getConnection();
     }
 
-    public function insert(
-        int $orderId,
-        string $operationType,
-        string $paymentId,
-        string $paymentMethod,
-        string $paymentStatus,
-        string $callbackMessage,
-        string $operationId
-    ) {
-        $callbackInfo = [
+    private function getCallbackInfoFromCallbackDTO(int $orderId, EcpCallbackDTO $callbackDto): array
+    {
+        return [
             'order_id' => $orderId,
-            'operation_type' => $operationType,
-            'payment_id' => $paymentId,
-            'payment_method' => $paymentMethod,
-            'payment_status' => $paymentStatus,
-            'operation_id' => $operationId,
-            'callback_message' => $callbackMessage,
+            'operation_type' => $callbackDto->getOperationType(),
+            'payment_id' => $callbackDto->getPaymentId(),
+            'payment_method' => $callbackDto->getPaymentMethod() ?? '',
+            'payment_status' => $callbackDto->getPaymentStatus(),
+            'operation_id' => $callbackDto->getOperationId() ?? '',
+            'callback_message' => $callbackDto->getMessage(),
         ];
+    }
 
+    public function updateCallbackInfo(int $orderId, EcpCallbackDTO $callbackDto): void
+    {
+        $callbackInfo = $this->getCallbackInfoFromCallbackDTO($orderId, $callbackDto);
         try {
-            $select = $this->connection->select()->from(['callback_info' => $this->tableName])
-                ->where('callback_info.payment_id = ?', $paymentId);
-
-            $info = $this->connection->fetchRow($select);
-
-            if (is_array($info)) {
-                return $this->connection->update($this->tableName, $callbackInfo, ['payment_id = ?' => $paymentId]);
+            if (empty($this->getCallBackInfoByOrderId($orderId))) {
+                $this->insert($callbackInfo);
+            } else {
+                $this->update($callbackInfo);
             }
-
-            return $this->connection->insert($this->tableName, $callbackInfo);
-
-        } catch (\Exception $e) {
-            return null;
+        } catch (Exception $e) {
         }
     }
 
-    public function getCallBackInfoByOrderId($orderId)
+    public function getCallBackInfoByOrderId(int $orderId): array
     {
-        $select = $this->connection->select()->from(['callback_info' => $this->tableName])
+        $select = $this->connection->select()->from(['callback_info' => $this->resourceTableName])
             ->where('callback_info.order_id = ?', $orderId);
-        $callbackInfo =  $this->connection->fetchRow($select);
-        return $callbackInfo;
+        if (!$record = $this->connection->fetchRow($select)) {
+            return [];
+        }
+        return $record;
     }
 
-    public function createEntryFromArray($callbackData)
+    private function insert(array $callbackInfo): void
     {
-        $callbackData = json_decode($callbackData, true);
+        $this->connection->insert($this->resourceTableName, $callbackInfo);
+    }
+
+    private function update(array $callbackInfo): void 
+    {
+        $this->connection->update($this->resourceTableName, $callbackInfo, ['order_id = ?' => $callbackInfo['order_id']]);
     }
 }

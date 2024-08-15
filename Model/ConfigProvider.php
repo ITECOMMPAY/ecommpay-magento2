@@ -7,12 +7,11 @@ use Magento\Checkout\Model\ConfigProviderInterface;
 
 class ConfigProvider implements ConfigProviderInterface
 {
-    /** @var EcpConfigHelper */
-    private $configHelper;
+    private EcpConfigHelper $configHelper;
 
-    public function __construct()
+    public function __construct(EcpConfigHelper $configHelper)
     {
-        $this->configHelper = EcpConfigHelper::getInstance();
+        $this->configHelper = $configHelper;
     }
 
     /**

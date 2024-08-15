@@ -3,22 +3,30 @@
 namespace Ecommpay\Payments\Common;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Encryption\EncryptorInterface;
-use \Magento\Store\Model\StoreManagerInterface;
+use Magento\Sales\Api\Data\TransactionInterface;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class EcpConfigHelper
 {
-    public const PLUGIN_VERSION = '1.2.0';
+    public const PLUGIN_VERSION = '2.0.0';
+    public const AUTHORIZE_TYPE = 'authorize';
+    public const AUTHORIZE_AND_CAPTURE_TYPE = 'authorize_capture';
+    public const TEST_PREFIX = 'test_';
+    public const CMS_PREFIX = 'mag_';
+    public const PP_LANGUAGE_DEFAULT = 'default';
+
     private const ECOMMPAY_GATE_PROTOCOL = 'https';
     private const ECOMMPAY_GATE_HOST = 'api.ecommpay.com';
+    private const GATE_CAPTURE_ENDPOINT_FORMAT = '%s://%s/v2/payment/%s/capture';
+    private const GATE_CANCEL_ENDPOINT_FORMAT = '%s://%s/v2/payment/%s/cancel';
     private const GATE_REFUND_ENDPOINT_FORMAT = '%s://%s/v2/payment/%s/refund';
     private const ECOMMPAY_PP_HOST = 'paymentpage.ecommpay.com';
     private const TEST_PROJECT_ID = 112;
     private const TEST_SECRET_KEY = 'kHRhsQHHhOUHeD+rt4kgH7OZiwE=';
-    public const TEST_PREFIX = 'test_';
-    public const CMS_PREFIX = 'mag_';
     private const INTERFACE_TYPE_ID = 13;
-
     private const CONFIG_PATH_ENABLE_PLUGIN = 'payment/ecommpay_general/enable_plugin';
     private const CONFIG_PATH_IS_TEST = 'payment/ecommpay_general/testmode';
     private const CONFIG_PATH_SALT = 'payment/ecommpay_general/salt';
@@ -27,58 +35,78 @@ class EcpConfigHelper
     private const CONFIG_PATH_PP_LANGUAGE = 'payment/ecommpay_general/pp_language';
     private const CONFIG_PATH_ADDITIONAL_PARAMETERS = 'payment/ecommpay_general/additional_parameters';
     private const CONFIG_PATH_FORCE_METHOD_FOR_MORE_METHODS = 'payment/ecommpay_more_methods/force_payment_method';
+    private const CONFIG_PATH_PAYMENT_ACTION_TYPE = 'payment/ecommpay_general/payment_action_type';
 
-    private static $instance;
+    public const AUTHORIZE_ONLY_PAYMENT_METHODS = [
+        'ecommpay_card',
+        'ecommpay_applepay',
+        'ecommpay_googlepay',
+    ];
 
-    /** @var ScopeConfigInterface */
-    private $scopeConfig;
+    private ScopeConfigInterface $scopeConfig;
+    private EncryptorInterface $encryptor;
+    private string $storeScope;
+    private StoreManagerInterface $storeManagerInterface;
 
-    /** @var EncryptorInterface */
-    private $encryptor;
-
-    /** @var string */
-    private $storeScope;
-
-    /** @var bool | null */
-    private $isTestMode;
-
-    /**
-     *
-     * @return EcpConfigHelper */
-    public static function getInstance()
+    public function __construct(
+        ScopeConfigInterface $scopeConfigInterface,
+        StoreManagerInterface $storeManagerInterface,
+        EncryptorInterface $encryptorInterface
+    )
     {
-        if (!(self::$instance instanceof self)) {
-            self::$instance = new self();
+        $this->scopeConfig = $scopeConfigInterface;
+        $this->encryptor = $encryptorInterface;
+        $this->storeScope = ScopeInterface::SCOPE_STORE;
+        $this->storeManagerInterface = $storeManagerInterface;
+    }
+
+    public static function priceMultiplyByCurrencyCode($price, $currencyCode): int
+    {
+        $non_decimal_currencies = [
+            'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG',
+            'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+        ];
+        if (!in_array($currencyCode, $non_decimal_currencies, true)) {
+            return (int)round($price * 100);
         }
-        return self::$instance;
+        return (int)round($price);
     }
 
-    private function __construct()
-    {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $this->scopeConfig = $objectManager->get(ScopeConfigInterface::class);
-        $this->encryptor = $objectManager->get(EncryptorInterface::class);
-        $this->storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-    }
-
-    public function getPluginEnabled()
+    public function getPluginEnabled(): bool
     {
         return (bool)($this->scopeConfig->getValue(self::CONFIG_PATH_ENABLE_PLUGIN, $this->storeScope));
     }
 
-    public function getGateRefundEndpoint($endpoint)
+    public function getGateCancelEndpoint($endpoint): string
     {
         $protocol = $this->getProtocol();
         $host = $this->getGateApiHost();
-        return  sprintf(self::GATE_REFUND_ENDPOINT_FORMAT, $protocol, $host, $endpoint);
+        return sprintf(self::GATE_CANCEL_ENDPOINT_FORMAT, $protocol, $host, $endpoint);
     }
 
-    public function isTestMode()
+    public function getProtocol(): string
     {
-        if ($this->isTestMode === null) {
-            $this->isTestMode = (bool)($this->scopeConfig->getValue(self::CONFIG_PATH_IS_TEST, $this->storeScope));
-        }
-        return $this->isTestMode;
+        return getenv('ECOMMPAY_GATE_PROTOCOL') ?: EcpConfigHelper::ECOMMPAY_GATE_PROTOCOL;
+    }
+
+    public function getGateApiHost(): string
+    {
+        $gateHostFromEnv = getenv('ECOMMPAY_GATE_HOST');
+        return is_string($gateHostFromEnv) ? $gateHostFromEnv : EcpConfigHelper::ECOMMPAY_GATE_HOST;
+    }
+
+    public function getGateCaptureEndpoint($endpoint): string
+    {
+        $protocol = $this->getProtocol();
+        $host = $this->getGateApiHost();
+        return sprintf(self::GATE_CAPTURE_ENDPOINT_FORMAT, $protocol, $host, $endpoint);
+    }
+
+    public function getGateRefundEndpoint($endpoint): string
+    {
+        $protocol = $this->getProtocol();
+        $host = $this->getGateApiHost();
+        return sprintf(self::GATE_REFUND_ENDPOINT_FORMAT, $protocol, $host, $endpoint);
     }
 
     public function getSecretKeyDecrypted()
@@ -90,13 +118,17 @@ class EcpConfigHelper
         return $this->encryptor->decrypt($saltEncrypted);
     }
 
-    public function getProjectId()
+    public function isTestMode(): bool
+    {
+        return (bool)($this->scopeConfig->getValue(self::CONFIG_PATH_IS_TEST, $this->storeScope));
+    }
+
+    public function getProjectId(): int
     {
         if ($this->isTestMode()) {
             return self::TEST_PROJECT_ID;
-        } else {
-            return (int)($this->scopeConfig->getValue(self::CONFIG_PATH_PROJECT_ID, $this->storeScope));
-        }
+        } 
+        return (int)($this->scopeConfig->getValue(self::CONFIG_PATH_PROJECT_ID, $this->storeScope));
     }
 
     public function getDisplayMode()
@@ -104,29 +136,20 @@ class EcpConfigHelper
         return $this->scopeConfig->getValue(self::CONFIG_PATH_DISPLAY_MODE, $this->storeScope);
     }
 
-    public function getPPHost()
+    public function getPaymentActionType()
+    {
+        return $this->scopeConfig->getValue(self::CONFIG_PATH_PAYMENT_ACTION_TYPE, $this->storeScope);
+    }
+
+    public function getPPHost(): string
     {
         $PPHostFromEnv = getenv('PAYMENTPAGE_HOST');
         return is_string($PPHostFromEnv) ? $PPHostFromEnv : EcpConfigHelper::ECOMMPAY_PP_HOST;
     }
 
-    public function getGateApiHost()
+    public function getMerchantCallbackUrl(): string
     {
-        $gateHostFromEnv = getenv('ECOMMPAY_GATE_HOST');
-        return is_string($gateHostFromEnv) ? $gateHostFromEnv : EcpConfigHelper::ECOMMPAY_GATE_HOST;
-    }
-
-    public function getProtocol()
-    {
-        $protocolFromEnv = getenv('ECOMMPAY_GATE_PROTOCOL');
-        return is_string($protocolFromEnv) ? $protocolFromEnv : EcpConfigHelper::ECOMMPAY_GATE_PROTOCOL;
-    }
-
-    public function getMerchantCallbackUrl()
-    {
-        $objectManager =  \Magento\Framework\App\ObjectManager::getInstance();
-        $storeManager = $objectManager->get(StoreManagerInterface::class);
-        $store = $storeManager->getStore();
+        $store = $this->storeManagerInterface->getStore();
         $baseUrl = $store->getBaseUrl();
         if ($this->getProtocol() === "http") {
             $baseUrl = str_replace("https", "http", $baseUrl);
@@ -134,7 +157,7 @@ class EcpConfigHelper
         return sprintf('%secommpay/endpayment/index', $baseUrl);
     }
 
-    public function getInterfaceTypeId()
+    public function getInterfaceTypeId(): array
     {
         return [
             'id' => self::INTERFACE_TYPE_ID
@@ -156,7 +179,7 @@ class EcpConfigHelper
         return $this->scopeConfig->getValue(self::CONFIG_PATH_ADDITIONAL_PARAMETERS, $this->storeScope);
     }
 
-    public function getDescriptions()
+    public function getDescriptions(): array
     {
         $result = [];
         $methods = [
@@ -190,17 +213,8 @@ class EcpConfigHelper
         return $result;
     }
 
-    public static function priceMultiplyByCurrencyCode($price, $currencyCode)
+    public function getMethodEndPoint(string $code): ?string
     {
-        $non_decimal_currencies = [
-            'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG',
-            'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
-        ];
-        if (!in_array($currencyCode, $non_decimal_currencies)) {
-            $price = (int) round($price * 100);
-        } else {
-            $price = (int) $price;
-        }
-        return $price;
+        return $this->scopeConfig->getValue('payment/' . $code . '/methodEndpoint', $this->storeScope);
     }
 }

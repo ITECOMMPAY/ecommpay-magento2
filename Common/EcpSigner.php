@@ -4,6 +4,13 @@ namespace Ecommpay\Payments\Common;
 
 class EcpSigner
 {
+    private EcpConfigHelper $configHelper;
+
+    public function __construct(EcpConfigHelper $configHelper)
+    {
+        $this->configHelper = $configHelper;
+    }
+
     /**
      *
      * @param array $params
@@ -58,7 +65,7 @@ class EcpSigner
     {
         $paramsToSign = $this->getParamsToSign($data, $ignoredParams);
         $stringToSign = $this->getStringToSign($paramsToSign);
-        $secretKey = EcpConfigHelper::getInstance()->getSecretKeyDecrypted();
+        $secretKey = $this->configHelper->getSecretKeyDecrypted();
         return base64_encode(hash_hmac('sha512', $stringToSign, $secretKey, true));
     }
 

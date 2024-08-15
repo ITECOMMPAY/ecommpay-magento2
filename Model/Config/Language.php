@@ -2,15 +2,17 @@
 
 namespace Ecommpay\Payments\Model\Config;
 
+use Ecommpay\Payments\Common\EcpConfigHelper;
+
 class Language implements \Magento\Framework\Option\ArrayInterface
 {
     /**
      *
      * @return array */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
-            ['value' => 'default', 'label' => __('Auto')],
+            ['value' => EcpConfigHelper::PP_LANGUAGE_DEFAULT, 'label' => __('Auto')],
             ['value' => 'en', 'label' => __('English')],
             ['value' => 'fr', 'label' => __('France')],
             ['value' => 'it', 'label' => __('Italian')],

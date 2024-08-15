@@ -18,7 +18,7 @@
         <field id="ecommpay_project_id" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1"
                showInStore="1">
             <label>Project ID</label>
-            <comment><![CDATA[Your project ID you could get from ECOMMPAY helpdesk. Leave it blank if test mode]]></comment>
+            <comment><![CDATA[Your project ID you could get from Ecommpay helpdesk. Leave it blank if test mode]]></comment>
             <config_path>payment/ecommpay_general/project_id</config_path>
             <depends>
                 <field id="ecommpay_testmode">0</field>
@@ -30,7 +30,7 @@
                showInStore="1">
             <label>Secret key</label>
             <comment>
-                <![CDATA[Secret key which is using to sign payment request. You could get it from ECOMMPAY helpdesk]]>
+                <![CDATA[Secret key which is using to sign payment request. You could get it from Ecommpay helpdesk]]>
             </comment>
             <config_path>payment/ecommpay_general/salt</config_path>
             <depends>
@@ -58,9 +58,16 @@
         <field id="ecommpay_additional_parameters" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1"
                showInStore="1">
             <label>Additional parameters</label>
-            <comment><![CDATA[It will be added to redirect link to ECommPay payment page]]></comment>
+            <comment><![CDATA[It will be added to redirect link to Ecommpay payment page]]></comment>
             <config_path>payment/ecommpay_general/additional_parameters</config_path>
         </field>
 
+        <field id="ecommpay_payment_action_type" translate="label" type="select" sortOrder="9" showInDefault="1" showInWebsite="1"
+               showInStore="1">
+            <label>Payment action</label>
+            <source_model>Ecommpay\Payments\Model\Config\PaymentActionType</source_model>
+            <comment><![CDATA[The payment action determines when the funds are captured and when invoices are created for your sales orders.]]></comment>
+            <config_path>payment/ecommpay_general/payment_action_type</config_path>
+        </field>
     </group>
 </include>

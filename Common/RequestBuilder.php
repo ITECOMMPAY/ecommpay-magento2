@@ -7,69 +7,54 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Checkout\Model\Session;
+use Magento\Sales\Model\Order;
 
 class RequestBuilder
 {
     private const SUCCESS_URL = 'checkout/onepage/success';
     private const FAIL_URL = 'checkout/onepage/failure';
-    /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
-     */
-    protected $scopeConfig;
+    private const CARD_OPERATION_TYPE_SALE = 'sale';
+    private const CARD_OPERATION_TYPE_AUTH = 'auth';
 
-    /**
-     * @var \Magento\Checkout\Model\Session
-     */
-    protected $checkoutSession;
+    public EcpSigner $signer;
+    protected ScopeConfigInterface $scopeConfig;
+    protected Session $checkoutSession;
+    protected UrlInterface $urlBuilder;
+    protected EcpConfigHelper $configHelper;
+    protected RequestInterface $request;
+    protected string $magentoVersion;
+    protected OrderPaymentManager $orderPaymentManager;
 
-    /**
-     * @var \Magento\Framework\UrlInterface
-     */
-    protected $urlBuilder;
 
-    /**
-     * @var EcpConfigHelper
-     */
-    protected $configHelper;
-
-    /**
-     * @var EcpSigner
-     */
-    public $signer;
-
-    protected $magentoVersion;
-
-    protected $request;
-
-    /**
-     * Signer constructor.
-     */
-    public function __construct(RequestInterface $request)
+    public function __construct(
+        RequestInterface $request,
+        ScopeConfigInterface $scopeConfig,
+        Session $session,
+        UrlInterface $urlBuilder,
+        EcpSigner $signer,
+        EcpConfigHelper $configHelper,
+        ProductMetadataInterface $productMetadata,
+        OrderPaymentManager $orderPaymentManager
+    )
     {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-
         $this->request = $request;
-        $this->scopeConfig = $objectManager->get(ScopeConfigInterface::class);
-        $this->checkoutSession = $objectManager->get(Session::class);
-        $this->urlBuilder = $objectManager->get(UrlInterface::class);
-        $this->configHelper = EcpConfigHelper::getInstance();
-        $this->signer = new EcpSigner();
-        $productMetadata = $objectManager->get(ProductMetadataInterface::class);
+        $this->scopeConfig = $scopeConfig;
+        $this->checkoutSession = $session;
+        $this->urlBuilder = $urlBuilder;
+        $this->configHelper = $configHelper;
+        $this->signer = $signer;
         $this->magentoVersion = $productMetadata->getVersion();
+        $this->orderPaymentManager = $orderPaymentManager;
     }
 
-    /**
-     *
-     * @return string */
-    public function getPaymentPageParams(\Magento\Sales\Model\Order $order)
+    public function getPaymentPageParams(Order $order): array
     {
-        $orderPaymentManager = new OrderPaymentManager();
         $paymentId = uniqid(EcpConfigHelper::CMS_PREFIX);
         if ($this->configHelper->isTestMode()) {
             $paymentIdFormater = new EcpPaymentIdFormatter($this->request);
             $paymentId = $paymentIdFormater->addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
         }
-        $orderPaymentManager->insert($order->getEntityId(), $paymentId);
+        $this->orderPaymentManager->insert($order->getEntityId(), $paymentId);
         $paymentPageParams = $this->buildParams($order, $paymentId);
         $paymentPageParams = $this->appendPaymentMethod($paymentPageParams, $order);
 
@@ -85,13 +70,7 @@ class RequestBuilder
         return $paymentPageParams;
     }
 
-    /**
-     *
-     * @param Order $order
-     * @param string $paymentId
-     * @return array
-     */
-    protected function buildParams(\Magento\Sales\Model\Order $order, $paymentId)
+    protected function buildParams(Order $order, string $paymentId): array
     {
         $currencyCode = $order->getOrderCurrencyCode();
         $paymentAmount = EcpConfigHelper::priceMultiplyByCurrencyCode($order->getTotalDue(), $currencyCode);
@@ -110,25 +89,18 @@ class RequestBuilder
             '_magento_version' => $this->magentoVersion
         ];
 
-        $optinalParams = $this->getBillingDataFromOrder($order);
+        $optionalParams = $this->getBillingDataFromOrder($order);
+        $optionalParams = $this->setCardOperationType($optionalParams);
+        $optionalParams = $this->setAdditionalParams($optionalParams);
+        $optionalParams = $this->setPPlanguage($optionalParams);
+        $optionalParams['customer_id'] = $order->getCustomerId();
 
-        $optinalParams['customer_id'] = $order->getCustomerId();
-
-        if ($this->configHelper->getPPLanguage() != 'default') {
-            $optinalParams['language_code'] = $this->configHelper->getPPLanguage();
-        }
-
-        $additionalParams = $this->configHelper->getAdditionalParameters();
-        if (!empty($additionalParams)) {
-            $additionalData = [];
-            parse_str($additionalParams, $additionalData);
-            $optinalParams = array_merge($optinalParams, $additionalData);
-        }
-        $optinalParams = $this->signer->unsetNullParams($optinalParams);
-        return array_merge($baseParams, $optinalParams);
+        $optionalParams = $this->signer->unsetNullParams($optionalParams);
+        return array_merge($baseParams, $optionalParams);
     }
 
-    public function getBillingDataFromOrder(\Magento\Sales\Model\Order $order) {
+    public function getBillingDataFromOrder(Order $order): array
+    {
         $billingAddress = $order->getBillingAddress();
         $address = implode(' ', $billingAddress->getStreet());
         $postCode = $billingAddress->getPostcode();
@@ -150,7 +122,7 @@ class RequestBuilder
         return $result;
     }
 
-    private function getReceiptData(\Magento\Sales\Model\Order $order)
+    private function getReceiptData(Order $order)
     {
         $items = $order->getItems();
         $currency = $order->getOrderCurrency();
@@ -292,20 +264,22 @@ class RequestBuilder
             '_magento_version' => $this->magentoVersion,
         ];
 
-        if ($this->configHelper->getPPLanguage() != 'default') {
-            $paymentPageParams['language_code'] = $this->configHelper->getPPLanguage();
+        if ($customerId = $quote->getCustomerId()) {
+            $paymentPageParams['customer_id'] = $customerId;
         }
 
-        if (!empty($this->checkoutSession->getQuote()->getCustomerId())) {
-            $paymentPageParams['customer_id'] = $quote->getCustomerId();
+        if ($billingAddress = $quote->getBillingAddress()) {
+            if ($billingStreet = $billingAddress->getStreet()) {
+                $paymentPageParams['avs_street_address'] = implode(' ', $billingStreet);
+            }
+            if ($billingPostcode = $billingAddress->getPostcode()) {
+                $paymentPageParams['avs_post_code'] = $billingPostcode;
+            }
         }
 
-        $additionalParams = $this->configHelper->getAdditionalParameters();
-        if (!empty($additionalParams)) {
-            $additionalData = [];
-            parse_str($additionalParams, $additionalData);
-            $paymentPageParams = array_merge($paymentPageParams, $additionalData);
-        }
+        $paymentPageParams = $this->setCardOperationType($paymentPageParams);
+        $paymentPageParams = $this->setAdditionalParams($paymentPageParams);
+        $paymentPageParams = $this->setPPlanguage($paymentPageParams);
 
         $paymentPageParams = $this->signer->unsetNullParams($paymentPageParams);
 
@@ -317,6 +291,33 @@ class RequestBuilder
             $this->configHelper->getPPHost()
         );
 
+        return $paymentPageParams;
+    }
+
+    private function setCardOperationType(array $paymentPageParams): array
+    {
+        $isAuthorizeType = $this->configHelper->getPaymentActionType() === EcpConfigHelper::AUTHORIZE_TYPE;
+        $paymentPageParams['card_operation_type'] = $isAuthorizeType ? self::CARD_OPERATION_TYPE_AUTH : self::CARD_OPERATION_TYPE_SALE;
+        return $paymentPageParams;
+    }
+
+    private function setAdditionalParams(array $paymentPageParams): array
+    {
+        $additionalParams = $this->configHelper->getAdditionalParameters();
+        if (empty($additionalParams)) {
+            return $paymentPageParams;
+        }
+        $additionalData = [];
+        parse_str($additionalParams, $additionalData);
+        return array_merge($paymentPageParams, $additionalData);
+    }
+
+    private function setPPlanguage(array $paymentPageParams): array
+    {
+        $ppLanguage = $this->configHelper->getPPLanguage();
+        if ($ppLanguage !== EcpConfigHelper::PP_LANGUAGE_DEFAULT) {
+            $paymentPageParams['language_code'] = $ppLanguage;
+        }
         return $paymentPageParams;
     }
 }

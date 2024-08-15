@@ -79,6 +79,8 @@ General:
 1. Magento >= 2.2
 
 ### Changelog
+#### 2.0.0
+* Feature: Two-step payments are now available!
 #### 1.2.0
 * Feature: Add new payment gateways Neteller, Skrill, Bancontact, Multibanco
 #### 1.1.2

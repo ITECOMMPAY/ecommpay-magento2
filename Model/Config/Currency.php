@@ -2,12 +2,14 @@
 
 namespace Ecommpay\Payments\Model\Config;
 
-class Currency implements \Magento\Framework\Option\ArrayInterface
+use Magento\Framework\Option\ArrayInterface;
+
+class Currency implements ArrayInterface
 {
     /**
      *
      * @return array */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         return [
             ['value' => 'default', 'label' => __('default (by store settings)')],

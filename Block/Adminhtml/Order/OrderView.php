@@ -4,7 +4,9 @@ namespace Ecommpay\Payments\Block\Adminhtml\Order;
 
 use Ecommpay\Payments\Common\CallbackInfoManager;
 use Magento\Directory\Helper\Data as DirectoryHelper;
+use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
+use Magento\Framework\Registry;
 
 class OrderView extends \Magento\Backend\Block\Template
 {
@@ -18,21 +20,22 @@ class OrderView extends \Magento\Backend\Block\Template
     protected $_template = 'Ecommpay_Payments::order/order_view.phtml';
 
     public function __construct(
-        \Magento\Framework\Registry $registry,
-        \Magento\Backend\Block\Template\Context $context,
+        Registry $registry,
+        Context $context,
+        CallbackInfoManager $callbackInfoManager,
         ?JsonHelper $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null,
         array $data = []
     ) {
         parent::__construct($context, $data, $jsonHelper, $directoryHelper);
         $this->registry = $registry;
+        $this->callbackInfoManager = $callbackInfoManager;
     }
 
     public function loadOrderData()
     {
         $orderId = $this->getOrderId();
-        $callbackInfoManager = new CallbackInfoManager();
-        $callbackData = $callbackInfoManager->getCallBackInfoByOrderId($orderId);
+        $callbackData = $this->callbackInfoManager->getCallBackInfoByOrderId($orderId);
         $this->orderId = $orderId;
         $this->operationType = $callbackData['operation_type'] ?? '';
         $this->paymentId = $callbackData['payment_id'] ?? '';

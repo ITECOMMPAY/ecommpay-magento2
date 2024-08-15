@@ -6,53 +6,68 @@ use Ecommpay\Payments\Common\Exception\EcpCallbackHandlerException;
 
 class EcpCallbackDTO
 {
+    public const
+        OPERATION_STATUS_SUCCESS = 'success',
+        OPERATION_STATUS_DECLINE = 'decline',
+        OPERATION_STATUS_AWAITING_3DS_RESULT = 'awaiting 3ds result',
+        OPERATION_STATUS_AWAITING_REDIRECT_RESULT = 'awaiting redirect result',
+        OPERATION_STATUS_AWAITING_CLARIFICATION = 'awaiting clarification',
+        OPERATION_STATUS_AWAITING_CUSTOMER_ACTION = 'awaiting customer action',
+        OPERATION_STATUS_AWAITING_MERCHANT_AUTH = 'awaiting merchant auth',
+        OPERATION_STATUS_PROCESSING = 'processing',
+        OPERATION_STATUS_ERROR = 'error';
+
     /** Single-message purchase */
-    private const OPERATION_TYPE_SALE = 'sale';
+    public const OPERATION_TYPE_SALE = 'sale';
 
     /** Purchase again using previously registered recurring. */
-    private const OPERATION_TYPE_RECURRING = 'recurring';
+    public const OPERATION_TYPE_RECURRING = 'recurring';
 
     /** Recurring update in payment system */
-    private const OPERATION_TYPE_RECURRING_UPDATE = 'recurring update';
+    public const OPERATION_TYPE_RECURRING_UPDATE = 'recurring update';
 
     /** Recurring cancel in payment system */
-    private const OPERATION_TYPE_RECURRING_CANCEL = 'recurring cancel';
+    public const OPERATION_TYPE_RECURRING_CANCEL = 'recurring cancel';
 
     /** First step of double-message purchase - hold */
-    private const OPERATION_TYPE_AUTH = 'auth';
+    public const OPERATION_TYPE_AUTH = 'auth';
 
     /** Second step of double-message purchase - confirmation */
-    private const OPERATION_TYPE_CAPTURE = 'capture';
+    public const OPERATION_TYPE_CAPTURE = 'capture';
 
     /** Void previously held double-message transaction */
-    private const OPERATION_TYPE_CANCEL = 'cancel';
+    public const OPERATION_TYPE_CANCEL = 'cancel';
 
     /** Operation for account verification */
-    private const ACCOUNT_VERIFICATION = 'account verification';
+    public const ACCOUNT_VERIFICATION = 'account verification';
 
     /** Refund back purchase */
-    private const OPERATION_TYPE_REFUND  = 'refund';
+    public const OPERATION_TYPE_REFUND = 'refund';
 
-    private const OPERATION_TYPE_REVERSAL  = 'reversal';
+    /** Refund back purchase within a working day */
+    public const OPERATION_TYPE_REVERSAL = 'reversal';
 
     private const REFUND_OPERATION_TYPES = [self::OPERATION_TYPE_REFUND, self::OPERATION_TYPE_REVERSAL];
-    private $orderId;
-    private $paymentMethod;
-    private $paymentId;
-    private $paymentStatus;
-    private $operationId;
-    private $operationType;
-    private $operationStatus;
-    private $callbackArray;
-    private $requestId;
-    private $message = '';
+
+    private string $orderId;
+    private ?string $paymentMethod;
+    private string $paymentId;
+    private string $paymentStatus;
+    private int $paymentAmount;
+    private string $paymentCurrency;
+    private int $operationAmount;
+    private int $operationInitialAmount;
+    private ?int $operationId;
+    private string $operationType;
+    private string $operationStatus;
+    private array $callbackArray;
+    private string $requestId;
+    private string $message = '';
 
     /**
-     *
-     * @param string $callbackJson
-     * @throws Exception
+     * @throws EcpCallbackHandlerException
      */
-    public static function create($callbackJson): EcpCallbackDTO
+    public static function create(string $callbackJson): EcpCallbackDTO
     {
         $callbackArray = json_decode($callbackJson, true);
 
@@ -72,97 +87,93 @@ class EcpCallbackDTO
             throw new EcpCallbackHandlerException('Empty "operation.request_id" field in callback data.');
         }
 
-        $paymentId = $callbackArray['payment']['id'];
-        $paymentMethod = $callbackArray['payment']['method'] ?? null;
-        $operationType = $callbackArray['operation']['type'];
-        $paymentStatus = $callbackArray['payment']['status'];
-        $operationId = $callbackArray['operation']['id'] ?? 0;
-        $operationStatus = $callbackArray['operation']['status'];
-        $requestId = $callbackArray['operation']['request_id'];
-
         $object = new self();
         $object->callbackArray = $callbackArray;
-        $object->paymentId = $paymentId;
-        $object->paymentMethod = $paymentMethod;
-        $object->operationType = $operationType;
-        $object->paymentStatus = $paymentStatus;
-        $object->operationId = $operationId;
-        $object->operationStatus = $operationStatus;
-        $object->requestId = $requestId;
+        $object->paymentId = $callbackArray['payment']['id'];
+        $object->paymentMethod = $callbackArray['payment']['method'] ?? null;
+        $object->operationType = $callbackArray['operation']['type'];
+        $object->paymentStatus = $callbackArray['payment']['status'];
+        if (!empty($callbackArray['payment']['sum'])) {
+            $object->paymentAmount = $callbackArray['payment']['sum']['amount'];
+            $object->paymentCurrency = $callbackArray['payment']['sum']['currency'];
+        }
+        if (!empty($callbackArray['operation']['sum'])) {
+            $object->operationAmount = $callbackArray['operation']['sum']['amount'];
+        }
+        if (!empty($callbackArray['operation']['sum_initial'])) {
+            $object->operationInitialAmount = $callbackArray['operation']['sum_initial']['amount'];
+        }
+        $object->operationId = $callbackArray['operation']['id'] ?? null;
+        $object->operationStatus = $callbackArray['operation']['status'];
+        $object->requestId = $callbackArray['operation']['request_id'];
         if (!empty($callbackArray['operation']['message'])) {
             $object->message = $callbackArray['operation']['message'];
         }
         return $object;
     }
 
-    /**
-     *
-     * @return string */
-    public function getPaymentId()
+    public function getPaymentId(): string
     {
         return $this->paymentId;
     }
 
-    /**
-     *
-     * @return int */
-    public function getOrderId()
+    public function getOrderId(): int
     {
         return $this->orderId;
     }
 
-    /**
-     *
-     * @param int $orderId */
-    public function setOrderId($orderId): void
+    public function setOrderId(int $orderId): void
     {
         $this->orderId = $orderId;
     }
 
-    /**
-     *
-     * @return string */
-    public function getPaymentStatus()
+    public function getPaymentStatus(): string
     {
         return $this->paymentStatus;
     }
 
-    /**
-     *
-     * @return string */
-    public function getOperationId()
+    public function getPaymentAmount(): int
+    {
+        return $this->paymentAmount;
+    }
+
+    public function getPaymentCurrency(): string
+    {
+        return $this->paymentCurrency;
+    }
+
+
+    public function getOperationAmount(): int
+    {
+        return $this->operationAmount;
+    }
+
+    public function getOperationInitialAmount(): int
+    {
+        return $this->operationInitialAmount;
+    }
+
+    public function getOperationId(): ?int
     {
         return $this->operationId;
     }
 
-    /**
-     *
-     * @return string */
-    public function getOperationType()
+    public function getOperationType(): string
     {
         return $this->operationType;
     }
 
-    /**
-     *
-     * @return string */
-    public function getPaymentMethod()
+    public function getPaymentMethod(): ?string
     {
         return $this->paymentMethod;
     }
 
-    /**
-     *
-     * @return string */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
 
-    /**
-     *
-     * @return array */
-    public function getCallbackArray()
+    public function getCallbackArray(): array
     {
         return $this->callbackArray;
     }
@@ -177,18 +188,12 @@ class EcpCallbackDTO
         return $this->operationType === self::OPERATION_TYPE_SALE;
     }
 
-    /**
-     *
-     * @return string */
-    public function getRequestId()
+    public function getRequestId(): string
     {
         return $this->requestId;
     }
 
-    /**
-     *
-     * @return string */
-    public function getOperationStatus()
+    public function getOperationStatus(): string
     {
         return $this->operationStatus;
     }

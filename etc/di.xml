@@ -3,4 +3,421 @@
     <type name="Magento\Framework\View\Element\Template\File\Validator">
         <plugin name="ecommpay_view_element_template_file_validator" type="Ecommpay\Payments\Plugin\FileValidator" sortOrder="10" />
     </type>
+    <virtualType name="MethodCard" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayCardsValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_card</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodApplePay" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayApplePayValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_applepay</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodGooglePay" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayGooglePayValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_googlepay</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodOpenBanking" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayOpenBankingValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_open_banking</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodPayPal" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayPayPalValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_paypal</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodPayPalPayLater" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayPayPalPayLaterValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_paypal_paylater</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodSofort" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpaySofortValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_sofort</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodIdeal" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayIdealValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_ideal</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodKlarna" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayKlarnaValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_klarna</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodBlik" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayBlikValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_blik</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodGiropay" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayGiropayValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_giropay</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodNeteller" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayNetellerValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_neteller</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodSkrill" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpaySkrillValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_skrill</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodBancontact" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayBancontactValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_bancontact</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodMultibanco" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayMultibancoValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_multibanco</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="MethodMoreMethods" type="Ecommpay\Payments\Model\EcpAbstractMethod">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">\Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="valueHandlerPool" xsi:type="object">EcommpayMoreMethodsValueHandlerPool</argument>
+            <argument name="paymentDataObjectFactory" xsi:type="object">Magento\Payment\Gateway\Data\PaymentDataObjectFactory</argument>
+            <argument name="code" xsi:type="string">ecommpay_more_methods</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="EcommpayCardsValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayCardsConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayCardsConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayCardsConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayCardsConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_card</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="EcommpayApplePayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayApplePayConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayApplePayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayApplePayConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayApplePayConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_applepay</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayGooglePayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayGooglePayConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayGooglePayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayGooglePayConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayGooglePayConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_googlepay</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayOpenBankingValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayOpenBankingConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayOpenBankingConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayOpenBankingConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayOpenBankingConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_open_banking</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayPayPalValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayPayPalConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayPayPalConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayPayPalConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayPayPalConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_paypal</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayPayPalPayLaterValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayPayPalPayLaterConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayPayPalPayLaterConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayPayPalPayLaterConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayPayPalPayLaterConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_paypal_paylater</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpaySofortValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpaySofortConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpaySofortConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpaySofortConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpaySofortConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_sofort</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayIdealValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayIdealConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayIdealConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayIdealConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayIdealConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_ideal</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayKlarnaValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayKlarnaConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayKlarnaConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayKlarnaConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayKlarnaConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_klarna</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayBlikValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayBlikConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayBlikConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayBlikConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayBlikConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_blik</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayGiropayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayGiropayConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayGiropayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayGiropayConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayGiropayConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_giropay</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayNetellerValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayNetellerConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayNetellerConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayNetellerConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayNetellerConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_neteller</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpaySkrillValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpaySkrillConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpaySkrillConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpaySkrillConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpaySkrillConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_skrill</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayBancontactValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayBancontactConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayBancontactConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayBancontactConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayBancontactConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_bancontact</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayMultibancoValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayMultibancoConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayMultibancoConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayMultibancoConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayMultibancoConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_multibanco</argument>
+        </arguments>
+    </virtualType>
+    
+    <virtualType name="EcommpayMoreMethodsValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">EcommpayMoreMethodsConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayMoreMethodsConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">EcommpayMoreMethodsConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="EcommpayMoreMethodsConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">ecommpay_more_methods</argument>
+        </arguments>
+    </virtualType>
+
 </config>
