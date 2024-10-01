@@ -1,13 +1,16 @@
-# ECOMMPAY Payments
-Contributors: ECOMMPAY
+# Ecommpay Payments.
+Contributors: Ecommpay.
+
 Tags: card payments, apple pay, google pay, open banking, paypal, sofort, ideal, klarna, giropay, payment gateway, Magento
+
 License: GPLv2s
+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Accept bank transfers, cards, local payment methods and cryptocurrencies. Boost conversion with a customisable checkout form. Enjoy 24/7 expert support.
 
 ## Description
-ECOMMPAY’s Magento plugin is a complete growth-focused payment solution for merchants looking to dominate local markets or expand globally, maximise profits and reduce operational costs.
+Ecommpay’s Magento plugin is a complete growth-focused payment solution for merchants looking to dominate local markets or expand globally, maximise profits and reduce operational costs.
 
 Accept card, bank, eWallet and crypto payments. Make payouts in any Mlocal currency and receive weekly or even more frequent settlements in EUR or GBP. Enjoy industry-leading support, low and transparent fees and advanced checkout form customisation options, including full localisation to any language.
 
@@ -65,11 +68,11 @@ php bin/magento setup:static-content:deploy
 ## Setting up
 1. In your Magento Admin Panel, navigate to _Stores -> Configuration -> Sales -> Payment Methods -> ECOMMPAY_.
 2. Fill in the "Project ID" and "Secret key" fields in the "General Settings" section, and save the settings.
-3. You're now ready to start using ECOMMPAY with Magento.
+3. You're now ready to start using Ecommpay with Magento.
 
 ## How do I start?
 1. Download and install our free Magento plugin. It’s quick and easy. Feel free to test it any time
-2. Create a merchant account with ECOMMPAY and provide all the necessary documents
+2. Create a merchant account with Ecommpay and provide all the necessary documents
 3. Once approved, go live and start accepting payments in just a couple of days.
 4. Receive weekly or even more frequent settlements.
 5. Scale your business easily and expand to new markets with the same plugin.

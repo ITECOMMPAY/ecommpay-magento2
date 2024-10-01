@@ -11,7 +11,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class EcpConfigHelper
 {
-    public const PLUGIN_VERSION = '2.0.0';
+    public const PLUGIN_VERSION = '2.0.1';
     public const AUTHORIZE_TYPE = 'authorize';
     public const AUTHORIZE_AND_CAPTURE_TYPE = 'authorize_capture';
     public const TEST_PREFIX = 'test_';
