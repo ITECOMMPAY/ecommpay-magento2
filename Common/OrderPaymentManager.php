@@ -10,7 +10,7 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 class OrderPaymentManager
 {
     private const TABLE_NAME = 'ecp_order_payment';
-    
+
     private AdapterInterface $connection;
     private string $resourceTableName;
 
@@ -51,5 +51,10 @@ class OrderPaymentManager
         } else {
             return null;
         }
+    }
+
+    public function deleteByOrderId($orderId)
+    {
+        $this->connection->delete($this->resourceTableName, ['order_id' => $orderId]);
     }
 }

@@ -69,5 +69,12 @@
             <comment><![CDATA[The payment action determines when the funds are captured and when invoices are created for your sales orders.]]></comment>
             <config_path>payment/ecommpay_general/payment_action_type</config_path>
         </field>
+
+        <field id="ecommpay_failed_payment_action" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
+               showInStore="1">
+            <label>Action on Failed Payment</label>
+            <source_model>Ecommpay\Payments\Model\Config\FailedPaymentAction</source_model>
+            <config_path>payment/ecommpay_general/failed_payment_action</config_path>
+        </field>
     </group>
 </include>

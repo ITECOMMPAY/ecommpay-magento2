@@ -12,7 +12,7 @@ use Magento\Sales\Model\Order;
 class RequestBuilder
 {
     private const SUCCESS_URL = 'checkout/onepage/success';
-    private const FAIL_URL = 'checkout/onepage/failure';
+    private const FAIL_URL = 'ecommpay/endpayment/restorecart';
     private const CARD_OPERATION_TYPE_SALE = 'sale';
     private const CARD_OPERATION_TYPE_AUTH = 'auth';
 
@@ -257,9 +257,9 @@ class RequestBuilder
             'redirect_success_url' => $this->urlBuilder->getUrl(self::SUCCESS_URL),
             'redirect_success_enabled' => 2,
             'redirect_success_mode' => 'parent_page',
-            'redirect_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
-            'redirect_fail_enabled' => 2,
-            'redirect_fail_mode' => 'parent_page',
+            'merchant_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
+            'merchant_fail_enabled' => 2,
+            'merchant_fail_redirect_mode' => 'parent_page',
             '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
             '_magento_version' => $this->magentoVersion,
         ];

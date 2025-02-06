@@ -65,4 +65,9 @@ class CallbackInfoManager
     {
         $this->connection->update($this->resourceTableName, $callbackInfo, ['order_id = ?' => $callbackInfo['order_id']]);
     }
+
+    public function deleteByOrderId(int $orderId): void
+    {
+        $this->connection->delete($this->resourceTableName, ['order_id = ?' => $orderId]);
+    }
 }

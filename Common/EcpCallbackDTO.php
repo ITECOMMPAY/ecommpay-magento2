@@ -47,6 +47,8 @@ class EcpCallbackDTO
     /** Refund back purchase within a working day */
     public const OPERATION_TYPE_REVERSAL = 'reversal';
 
+    public const PAYMENT_STATUS_DECLINE = 'decline';
+
     private const REFUND_OPERATION_TYPES = [self::OPERATION_TYPE_REFUND, self::OPERATION_TYPE_REVERSAL];
 
     private string $orderId;

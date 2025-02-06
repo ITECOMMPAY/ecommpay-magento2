@@ -139,6 +139,12 @@ class Index extends Action implements CsrfAwareActionInterface
         }
 
         $orderId = $this->orderPaymentManager->getOrderIdByPaymentId($callbackDto->getPaymentId());
+        if (!$orderId) {
+            if ($callbackDto->getPaymentStatus() === EcpCallbackDTO::PAYMENT_STATUS_DECLINE) {
+                return $this->sendResultJson('There is no order for this payment ID. This order may have been deleted.');
+            }
+            return $this->sendResultJson('Something went wrong. There is no order for this payment ID.', [], 404);
+        }
         $callbackDto->setOrderId($orderId);
 
         try {
@@ -253,7 +259,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 break;
             case EcpCallbackDTO::OPERATION_STATUS_DECLINE:
             case EcpCallbackDTO::OPERATION_STATUS_ERROR:
-                $order->setStatus(Order::STATE_CANCELED);
+                $this->cancelOrder($order);
                 $order->addStatusToHistory($order->getStatus(), __('Payment authorization declined. Reason: ' . $callbackDto->getMessage()));
                 $this->createAuthTransaction($callbackDto, $order, true);
                 break;
@@ -274,7 +280,7 @@ class Index extends Action implements CsrfAwareActionInterface
     protected function processCaptureCallback(EcpCallbackDTO $callbackDto, Order $order): Json
     {
         $invoice = $this->getInvoiceFromOrderByRequestId($order, $callbackDto->getRequestId());
-        
+
         switch ($operation_status = $callbackDto->getOperationStatus()) {
             case EcpCallbackDTO::OPERATION_STATUS_SUCCESS:
                 $order->setStatus(Order::STATE_PROCESSING);
@@ -330,7 +336,7 @@ class Index extends Action implements CsrfAwareActionInterface
         $payment->setLastTransId($callbackDto->getRequestId());
         $payment->setShouldCloseParentTransaction(1);
         $payment->addTransaction(Transaction::TYPE_CAPTURE);
-        
+
         $invoice = $this->invoiceService->prepareInvoice($order);
         $invoice->register();
         $invoice->setTransactionId($callbackDto->getOperationId());
@@ -345,7 +351,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $order->setTotalPaid($order->getTotalPaid() + $payment->getAmountPaid());
             $order->setBaseTotalPaid($order->getBaseTotalPaid() + $payment->getAmountPaid());
         } else {
-            $order->setStatus(Order::STATE_CANCELED);
+            $this->cancelOrder($order);
             $invoice->setState(Invoice::STATE_CANCELED);
             $message = __('Operation ' . $callbackDto->getOperationType() .
                 ' decline by ecommpay. Reason: ' . $callbackDto->getMessage());
@@ -408,5 +414,16 @@ class Index extends Action implements CsrfAwareActionInterface
             'Order %s doesn\'t contain an creditmemo with a request id %s',
             $order->getId(), $requestId
         ));
+    }
+
+    private function cancelOrder(Order $order): void
+    {
+        if (in_array(
+            $this->configHelper->getFailedPaymentAction(),
+            EcpConfigHelper::ACTIONS_TO_CANCEL_ORDER,
+            true
+        )) {
+            $order->setStatus(Order::STATE_CANCELED);
+        }
     }
 }

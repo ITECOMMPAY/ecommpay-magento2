@@ -2,12 +2,14 @@ define(
     [
         'jquery',
         'Magento_Checkout/js/view/payment/default',
-        'mage/url'
+        'mage/url',
+        'Magento_Ui/js/model/messageList'
     ],
     function (
         $,
         Component,
-        urlBuilder
+        urlBuilder,
+        messageList
     ) {
         'use strict';
         var CHECK_VALIDATION_POST_MESSAGE = "{\"message\":\"epframe.embedded_mode.check_validation\",\"from_another_domain\":true}";
@@ -31,31 +33,33 @@ define(
                 if(displayMode !== 'embedded') {
                     return;
                 }
-                setTimeout(function(){
-                    var url = urlBuilder.build('ecommpay/startpayment/embeddedform?action=create');
-                    jQuery.ajax({
-                        method: 'POST',
-                        url: url,
-                        dataType: 'json',
-                        data: {
-                            ajax: true
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                paymentPageParams = response.cardRedirectUrl;
-                                loadEmbeddedIframe(paymentPageParams);
-                                return;
-                            }
-                            alert(response.error);
-                        },
-                        error: function(jqXHR, textStatus, errorThrown) {
-                            alert(textStatus);
-                            console.log(errorThrown);
-                        }
-                    })
-                },10);
+                setTimeout(startEmbeddedPayment,10);
             }
         }, 10);
+
+        function startEmbeddedPayment() {
+            var url = urlBuilder.build('ecommpay/startpayment/embeddedform?action=create');
+            jQuery.ajax({
+                method: 'POST',
+                url: url,
+                dataType: 'json',
+                data: {
+                    ajax: true
+                },
+                success: function(response) {
+                    if (response.success) {
+                        paymentPageParams = response.cardRedirectUrl;
+                        loadEmbeddedIframe(paymentPageParams);
+                        return;
+                    }
+                    alert(response.error);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert(textStatus);
+                    console.log(errorThrown);
+                }
+            });
+        }
 
         function loadEmbeddedIframe(paymentPageParams) {
             var embeddedIframeDivOld = null;
@@ -217,6 +221,20 @@ define(
                     break;
                 case 'epframe.payment.fail':
                 case 'epframe.card.verify.fail':
+                    if (displayMode === 'embedded') {
+                        jQuery.ajax({
+                            method: 'POST',
+                            url: '/ecommpay/endpayment/restorecart',
+                            success: function() {
+                                startEmbeddedPayment();
+                                hideOverlayLoader();
+                                messageList.addErrorMessage({ message: 'Payment was declined. You can try another payment method.' });
+                            },
+                            error: function(jqXHR, textStatus) {
+                                alert(textStatus);
+                            }
+                        });
+                    }
                     break;
                 case 'epframe.embedded_mode.redirect_3ds_parent_page':
                     redirect3DS(d.data);
@@ -231,6 +249,9 @@ define(
                     if(displayMode === 'embedded') {
                         window.postMessage(CHECK_VALIDATION_POST_MESSAGE);
                     }
+                    break;
+                case 'epframe.destroy':
+                    window.location.replace('/ecommpay/endpayment/restorecart');
                     break;
             }
         }, false);

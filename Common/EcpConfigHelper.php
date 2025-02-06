@@ -11,7 +11,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class EcpConfigHelper
 {
-    public const PLUGIN_VERSION = '2.0.1';
+    public const PLUGIN_VERSION = '2.1.0';
     public const AUTHORIZE_TYPE = 'authorize';
     public const AUTHORIZE_AND_CAPTURE_TYPE = 'authorize_capture';
     public const TEST_PREFIX = 'test_';
@@ -36,11 +36,22 @@ class EcpConfigHelper
     private const CONFIG_PATH_ADDITIONAL_PARAMETERS = 'payment/ecommpay_general/additional_parameters';
     private const CONFIG_PATH_FORCE_METHOD_FOR_MORE_METHODS = 'payment/ecommpay_more_methods/force_payment_method';
     private const CONFIG_PATH_PAYMENT_ACTION_TYPE = 'payment/ecommpay_general/payment_action_type';
+    private const CONFIG_PATH_FAILED_PAYMENT_ACTION = 'payment/ecommpay_general/failed_payment_action';
 
     public const AUTHORIZE_ONLY_PAYMENT_METHODS = [
         'ecommpay_card',
         'ecommpay_applepay',
         'ecommpay_googlepay',
+    ];
+
+    public const
+        FAILED_PAYMENT_ACTION_CANCEL_ORDER = 'cancel_order',
+        FAILED_PAYMENT_ACTION_DELETE_ORDER = 'delete_order',
+        FAILED_PAYMENT_ACTION_DO_NOTHING = 'do_nothing';
+
+    public const ACTIONS_TO_CANCEL_ORDER = [
+        self::FAILED_PAYMENT_ACTION_CANCEL_ORDER,
+        self::FAILED_PAYMENT_ACTION_DELETE_ORDER,
     ];
 
     private ScopeConfigInterface $scopeConfig;
@@ -127,7 +138,7 @@ class EcpConfigHelper
     {
         if ($this->isTestMode()) {
             return self::TEST_PROJECT_ID;
-        } 
+        }
         return (int)($this->scopeConfig->getValue(self::CONFIG_PATH_PROJECT_ID, $this->storeScope));
     }
 
@@ -139,6 +150,11 @@ class EcpConfigHelper
     public function getPaymentActionType()
     {
         return $this->scopeConfig->getValue(self::CONFIG_PATH_PAYMENT_ACTION_TYPE, $this->storeScope);
+    }
+
+    public function getFailedPaymentAction()
+    {
+        return $this->scopeConfig->getValue(self::CONFIG_PATH_FAILED_PAYMENT_ACTION, $this->storeScope);
     }
 
     public function getPPHost(): string
