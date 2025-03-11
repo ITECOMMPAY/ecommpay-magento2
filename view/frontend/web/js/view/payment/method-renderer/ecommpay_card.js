@@ -3,13 +3,15 @@ define(
         'jquery',
         'Magento_Checkout/js/view/payment/default',
         'mage/url',
-        'Magento_Ui/js/model/messageList'
+        'Magento_Ui/js/model/messageList',
+        'Magento_Checkout/js/model/full-screen-loader',
     ],
     function (
         $,
         Component,
         urlBuilder,
-        messageList
+        messageList,
+        fullScreenLoader
     ) {
         'use strict';
         var CHECK_VALIDATION_POST_MESSAGE = "{\"message\":\"epframe.embedded_mode.check_validation\",\"from_another_domain\":true}";
@@ -157,6 +159,7 @@ define(
         }
 
         function processEmbeddedForm() {
+            showOverlayLoader();
             var endpoint = urlBuilder.build('ecommpay/startpayment/embeddedform?action=process&payment_id=' + paymentPageParams.payment_id);
             jQuery.ajax({
                 method: 'POST',
@@ -197,11 +200,11 @@ define(
         }
 
         function showOverlayLoader() {
-            $('#ecommpay-overlay-loader').show();
+            fullScreenLoader.startLoader();
         }
 
         function hideOverlayLoader() {
-            $('#ecommpay-overlay-loader').hide();
+            fullScreenLoader.stopLoader();
         }
 
         window.addEventListener("message", function (e){
@@ -240,7 +243,6 @@ define(
                     redirect3DS(d.data);
                     break;
                 case 'epframe.payment.sent':
-                    showOverlayLoader();
                     break;
                 case 'epframe.show_clarification_page':
                     startClarification();
@@ -281,7 +283,6 @@ define(
         }
 
         function submitClarification() {
-            showOverlayLoader();
             var message = {"message":"epframe.embedded_mode.submit"};
             message.fields = {};
             message.from_another_domain = true;
@@ -357,6 +358,7 @@ define(
                     success: function(response) {
                         if (response.success) {
                             if(response.amountIsEqual) {
+                                hideOverlayLoader();
                                 component.placeOrder();
                             } else {
                                 window.location.reload();
