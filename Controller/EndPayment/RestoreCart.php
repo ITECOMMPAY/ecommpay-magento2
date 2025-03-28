@@ -25,6 +25,8 @@ class RestoreCart extends Action
     private CallbackInfoManager $callbackInfoManager;
 
     private const CART_URL = 'checkout/cart';
+    private const DECLINED = 'declined';
+    private const CANCELLED = 'cancelled';
 
     public function __construct(
         Context $context,
@@ -52,7 +54,8 @@ class RestoreCart extends Action
      */
     public function execute(): Redirect
     {
-        $isAjax = $this->getRequest()->isXmlHttpRequest();
+        $request = $this->getRequest();
+        $isAjax = $request->isXmlHttpRequest();
 
         $lastRealOrder = $this->checkoutSession->getLastRealOrder();
         if ($lastRealOrder->getPayment()) {
@@ -65,7 +68,9 @@ class RestoreCart extends Action
             $this->checkoutSession->restoreQuote();
 
             if (!$isAjax) {
-                $this->messageManager->addErrorMessage('Payment was declined. You can try another payment method.');
+                $isCancelled = $request->getParam(self::CANCELLED, 0);
+                $message = sprintf('Payment was %s. You can try another payment method.', $isCancelled ? self::CANCELLED : self::DECLINED);
+                $this->messageManager->addErrorMessage($message);
             }
         }
 

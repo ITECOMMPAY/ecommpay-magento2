@@ -13,6 +13,7 @@ class RequestBuilder
 {
     private const SUCCESS_URL = 'checkout/onepage/success';
     private const FAIL_URL = 'ecommpay/endpayment/restorecart';
+    private const RETURN_URL = 'ecommpay/endpayment/restorecart?cancelled=1';
     private const CARD_OPERATION_TYPE_SALE = 'sale';
     private const CARD_OPERATION_TYPE_AUTH = 'auth';
 
@@ -85,6 +86,7 @@ class RequestBuilder
             'merchant_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
             'merchant_fail_enabled' => 2,
             'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
+            'merchant_return_url' => $this->urlBuilder->getUrl(self::RETURN_URL),
             '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
             '_magento_version' => $this->magentoVersion
         ];
