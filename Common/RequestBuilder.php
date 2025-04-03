@@ -26,7 +26,6 @@ class RequestBuilder
     protected string $magentoVersion;
     protected OrderPaymentManager $orderPaymentManager;
 
-
     public function __construct(
         RequestInterface $request,
         ScopeConfigInterface $scopeConfig,
@@ -36,8 +35,7 @@ class RequestBuilder
         EcpConfigHelper $configHelper,
         ProductMetadataInterface $productMetadata,
         OrderPaymentManager $orderPaymentManager
-    )
-    {
+    ) {
         $this->request = $request;
         $this->scopeConfig = $scopeConfig;
         $this->checkoutSession = $session;
@@ -88,7 +86,7 @@ class RequestBuilder
             'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
             'merchant_return_url' => $this->urlBuilder->getUrl(self::RETURN_URL),
             '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
-            '_magento_version' => $this->magentoVersion
+            '_magento_version' => $this->magentoVersion,
         ];
 
         $optionalParams = $this->getBillingDataFromOrder($order);
@@ -116,12 +114,85 @@ class RequestBuilder
             'billing_city' => $billingAddress->getCity(),
             'billing_address' => $address,
             'billing_postal' => $postCode,
+            'payment_description' => 'Order ID = ' . $order->getIncrementId(),
         ];
         if ($address !== null && $postCode !== null) {
             $result['avs_street_address'] = $address;
             $result['avs_post_code'] = $postCode;
         }
         return $result;
+    }
+
+    private function setCardOperationType(array $paymentPageParams): array
+    {
+        $isAuthorizeType = $this->configHelper->getPaymentActionType() === EcpConfigHelper::AUTHORIZE_TYPE;
+        $paymentPageParams['operation_type'] = $isAuthorizeType ? self::CARD_OPERATION_TYPE_AUTH : self::CARD_OPERATION_TYPE_SALE;
+        return $paymentPageParams;
+    }
+
+    private function setAdditionalParams(array $paymentPageParams): array
+    {
+        $additionalParams = $this->configHelper->getAdditionalParameters();
+        if (empty($additionalParams)) {
+            return $paymentPageParams;
+        }
+        $additionalData = [];
+        parse_str($additionalParams, $additionalData);
+        return array_merge($paymentPageParams, $additionalData);
+    }
+
+    private function setPPlanguage(array $paymentPageParams): array
+    {
+        $ppLanguage = $this->configHelper->getPPLanguage();
+        if ($ppLanguage !== EcpConfigHelper::PP_LANGUAGE_DEFAULT) {
+            $paymentPageParams['language_code'] = $ppLanguage;
+        }
+        return $paymentPageParams;
+    }
+
+    private function appendPaymentMethod(array $urlData, Order $order): array
+    {
+        $forcePaymentMethods = [
+            'card',
+            'apple_pay_core',
+            'google_pay_host',
+            'sofort',
+            'blik',
+            'giropay',
+            'ideal',
+            'klarna',
+            'paypal-wallet',
+            'neteller',
+            'skrill',
+            'bancontact',
+            'multibanco',
+        ];
+        $methodParam = $this->request->getParam('method');
+        if (empty($methodParam)) {
+            return $urlData;
+        }
+
+        if ($methodParam === 'open_banking') {
+            $urlData['force_payment_group'] = 'openbanking';
+        } elseif ($methodParam === 'paypal-paylater') {
+            $urlData['force_payment_method'] = 'paypal-wallet';
+            $urlData['payment_methods_options'] = "{\"submethod_code\": \"paylater\"}";
+        } elseif (in_array($methodParam, $forcePaymentMethods)) {
+            $urlData['force_payment_method'] = $methodParam;
+        } elseif ($methodParam === 'more_methods') {
+            $forceMethodForMoreMethods = $this->configHelper->getForceMethodForMoreMethods();
+            if (!empty($forceMethodForMoreMethods)) {
+                $urlData['force_payment_method'] = $forceMethodForMoreMethods;
+            }
+        }
+        if ($methodParam === 'klarna') {
+            $urlData['receipt_data'] = $this->getReceiptData($order);
+            $countryId = $order->getBillingAddress()->getCountryId();
+            if ($countryId) {
+                $urlData['customer_country'] = $countryId;
+            }
+        }
+        return $urlData;
     }
 
     private function getReceiptData(Order $order)
@@ -187,52 +258,7 @@ class RequestBuilder
         return $data;
     }
 
-    private function appendPaymentMethod($urlData, $order)
-    {
-        $forcePaymentMethods = [
-            'card',
-            'apple_pay_core',
-            'google_pay_host',
-            'sofort',
-            'blik',
-            'giropay',
-            'ideal',
-            'klarna',
-            'paypal-wallet',
-            'neteller',
-            'skrill',
-            'bancontact',
-            'multibanco',
-        ];
-        $methodParam = $this->request->getParam('method');
-        if (empty($methodParam)) {
-            return $urlData;
-        }
-
-        if ($methodParam === 'open_banking') {
-            $urlData['force_payment_group'] = 'openbanking';
-        } elseif ($methodParam === 'paypal-paylater') {
-            $urlData['force_payment_method'] = 'paypal-wallet';
-            $urlData['payment_methods_options'] = "{\"submethod_code\": \"paylater\"}";
-        } elseif (in_array($methodParam, $forcePaymentMethods)) {
-            $urlData['force_payment_method'] = $methodParam;
-        } elseif ($methodParam === 'more_methods') {
-            $forceMethodForMoreMethods = $this->configHelper->getForceMethodForMoreMethods();
-            if (!empty($forceMethodForMoreMethods)) {
-                $urlData['force_payment_method'] = $forceMethodForMoreMethods;
-            }
-        }
-        if ($methodParam === 'klarna') {
-            $urlData['receipt_data'] = $this->getReceiptData($order);
-            $countryId = $order->getBillingAddress()->getCountryId();
-            if ($countryId) {
-                $urlData['customer_country'] = $countryId;
-            }
-        }
-        return $urlData;
-    }
-
-    public function getPaymentPageParamsForEmbeddedMode()
+    public function getPaymentPageParamsForEmbeddedMode(): array
     {
         $quote = $this->checkoutSession->getQuote();
         $paymentId = uniqid(EcpConfigHelper::CMS_PREFIX);
@@ -293,33 +319,6 @@ class RequestBuilder
             $this->configHelper->getPPHost()
         );
 
-        return $paymentPageParams;
-    }
-
-    private function setCardOperationType(array $paymentPageParams): array
-    {
-        $isAuthorizeType = $this->configHelper->getPaymentActionType() === EcpConfigHelper::AUTHORIZE_TYPE;
-        $paymentPageParams['card_operation_type'] = $isAuthorizeType ? self::CARD_OPERATION_TYPE_AUTH : self::CARD_OPERATION_TYPE_SALE;
-        return $paymentPageParams;
-    }
-
-    private function setAdditionalParams(array $paymentPageParams): array
-    {
-        $additionalParams = $this->configHelper->getAdditionalParameters();
-        if (empty($additionalParams)) {
-            return $paymentPageParams;
-        }
-        $additionalData = [];
-        parse_str($additionalParams, $additionalData);
-        return array_merge($paymentPageParams, $additionalData);
-    }
-
-    private function setPPlanguage(array $paymentPageParams): array
-    {
-        $ppLanguage = $this->configHelper->getPPLanguage();
-        if ($ppLanguage !== EcpConfigHelper::PP_LANGUAGE_DEFAULT) {
-            $paymentPageParams['language_code'] = $ppLanguage;
-        }
         return $paymentPageParams;
     }
 }

@@ -19,7 +19,7 @@ define(
         var clarificationRunning = false;
         var displayMode = null;
 
-        $(document).keydown(function(event) {
+        $(document).keydown(function (event) {
             if (event.which === 13 && isEcommpayCardPayment() && (displayMode === null || displayMode === 'embedded')) {
                 event.preventDefault();
                 if (displayMode === 'embedded') {
@@ -28,14 +28,14 @@ define(
             }
         });
 
-        var timer = setInterval(function(){
+        var timer = setInterval(function () {
             if (window.checkoutConfig.ecommpay_settings.paymentPageHost != null) {
                 clearInterval(timer);
                 displayMode = window.checkoutConfig.ecommpay_settings.displayMode;
-                if(displayMode !== 'embedded') {
+                if (displayMode !== 'embedded') {
                     return;
                 }
-                setTimeout(startEmbeddedPayment,10);
+                setTimeout(startEmbeddedPayment, 10);
             }
         }, 10);
 
@@ -48,7 +48,7 @@ define(
                 data: {
                     ajax: true
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         paymentPageParams = response.cardRedirectUrl;
                         loadEmbeddedIframe(paymentPageParams);
@@ -56,7 +56,7 @@ define(
                     }
                     alert(response.error);
                 },
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR, textStatus, errorThrown) {
                     alert(textStatus);
                     console.log(errorThrown);
                 }
@@ -65,13 +65,13 @@ define(
 
         function loadEmbeddedIframe(paymentPageParams) {
             var embeddedIframeDivOld = null;
-            var intervalId = setInterval(function(){
+            var intervalId = setInterval(function () {
                 var embeddedIframeDiv = $("#ecommpay-iframe-embedded");
-                if(embeddedIframeDiv.length === 1 && embeddedIframeDiv.is(embeddedIframeDivOld) && paymentPageParams) {
+                if (embeddedIframeDiv.length === 1 && embeddedIframeDiv.is(embeddedIframeDivOld) && paymentPageParams) {
                     $('#ecommpay-loader-embedded').show();
                     loadIFrame(paymentPageParams, 'embedded');
                     clearInterval(intervalId);
-                    $('input[name="payment[method]"]').change(function(){
+                    $('input[name="payment[method]"]').change(function () {
                         if (isEcommpayCardPayment()) {
                             $(window).trigger('resize');
                         }
@@ -87,7 +87,8 @@ define(
                 if (!!parsed.message && !!parsed.data) {
                     return parsed;
                 }
-            } catch (e) {}
+            } catch (e) {
+            }
             return false;
         }
 
@@ -98,11 +99,11 @@ define(
         function loadIFrame(paymentPageParams, type) {
             var link = document.createElement('a');
 
-            paymentPageParams.onPaymentSuccess = function() {
+            paymentPageParams.onPaymentSuccess = function () {
                 window.location.replace(config.merchant_success_url);
             };
 
-            paymentPageParams.onPaymentFail = function() {
+            paymentPageParams.onPaymentFail = function () {
                 window.location.replace(config.merchant_fail_url);
             };
             delete paymentPageParams.paymentPageUrl;
@@ -140,7 +141,7 @@ define(
                 method: 'POST',
                 url: endpoint,
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         if (modePopup) {
                             loadIFrame(response.paymentPageParams, 'popup');
@@ -152,7 +153,7 @@ define(
                     }
                     alert(response.error);
                 },
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR, textStatus, errorThrown) {
                     alert(textStatus);
                 }
             });
@@ -165,9 +166,9 @@ define(
                 method: 'POST',
                 url: endpoint,
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
-                        var message = {"message":"epframe.embedded_mode.submit"};
+                        var message = {"message": "epframe.embedded_mode.submit"};
 
                         var billingFields = [
                             "billing_address", "billing_city", "billing_country", "billing_region", "billing_postal", "customer_first_name",
@@ -193,7 +194,7 @@ define(
                         alert(response.error);
                     }
                 },
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR, textStatus, errorThrown) {
                     alert(textStatus);
                 }
             });
@@ -207,12 +208,12 @@ define(
             fullScreenLoader.stopLoader();
         }
 
-        window.addEventListener("message", function (e){
+        window.addEventListener("message", function (e) {
             e.preventDefault();
             var d = parsePostMessage(e.data);
             switch (d.message) {
                 case 'epframe.loaded':
-                    if(displayMode === 'embedded') {
+                    if (displayMode === 'embedded') {
                         $('#ecommpay-iframe-embedded').show();
                         $('#ecommpay-loader-embedded').hide();
                         $(window).trigger('resize');
@@ -228,12 +229,12 @@ define(
                         jQuery.ajax({
                             method: 'POST',
                             url: '/ecommpay/endpayment/restorecart',
-                            success: function() {
+                            success: function () {
                                 startEmbeddedPayment();
                                 hideOverlayLoader();
-                                messageList.addErrorMessage({ message: 'Payment was declined. You can try another payment method.' });
+                                messageList.addErrorMessage({message: 'Payment was declined. You can try another payment method.'});
                             },
-                            error: function(jqXHR, textStatus) {
+                            error: function (jqXHR, textStatus) {
                                 alert(textStatus);
                             }
                         });
@@ -248,7 +249,7 @@ define(
                     startClarification();
                     break;
                 case 'epframe.enter_key_pressed':
-                    if(displayMode === 'embedded') {
+                    if (displayMode === 'embedded') {
                         window.postMessage(CHECK_VALIDATION_POST_MESSAGE);
                     }
                     break;
@@ -258,8 +259,11 @@ define(
             }
         }, false);
 
-        function showErrors() {}
-        function clearErrors() {}
+        function showErrors() {
+        }
+
+        function clearErrors() {
+        }
 
         function redirect3DS(data) {
             var form = document.createElement('form');
@@ -283,7 +287,7 @@ define(
         }
 
         function submitClarification() {
-            var message = {"message":"epframe.embedded_mode.submit"};
+            var message = {"message": "epframe.embedded_mode.submit"};
             message.fields = {};
             message.from_another_domain = true;
             window.postMessage(JSON.stringify(message));
@@ -304,21 +308,21 @@ define(
                 return this;
             },
 
-            onIFrameValidation: function(event) {
+            onIFrameValidation: function (event) {
                 var data = parsePostMessage(event.data);
                 if (!!data && data.message === "epframe.embedded_mode.check_validation_response") {
-                    if (!!data.data  && Object.keys(data.data).length > 0) {
+                    if (!!data.data && Object.keys(data.data).length > 0) {
                         var errors = [];
-                        jQuery.each(data.data, function( key, value ) {
+                        jQuery.each(data.data, function (key, value) {
                             errors.push(value);
                         });
-                        var errorsUnique = [... new Set(errors)]; //remove duplicated
+                        var errorsUnique = [...new Set(errors)]; //remove duplicated
                         console.log('validation errors', errorsUnique);
                         showErrors();
                     } else {
                         showOverlayLoader();
                         clearErrors();
-                        if(clarificationRunning) {
+                        if (clarificationRunning) {
                             submitClarification();
                         } else {
                             this.checkCartAmountBeforePlaceOrder();
@@ -334,13 +338,13 @@ define(
                 }
             },
 
-            getDescription: function() {
+            getDescription: function () {
                 if (window.checkoutConfig.ecommpay_settings.displayMode !== 'embedded') {
                     return window.checkoutConfig.ecommpay_settings.descriptions.ecommpay_card;
                 }
             },
 
-            placeOrderOnClick: function() {
+            placeOrderOnClick: function () {
                 if (displayMode === 'embedded') {
                     window.postMessage(CHECK_VALIDATION_POST_MESSAGE);
                 } else {
@@ -348,16 +352,16 @@ define(
                 }
             },
 
-            checkCartAmountBeforePlaceOrder: function() {
+            checkCartAmountBeforePlaceOrder: function () {
                 var component = this;
                 var endpoint = urlBuilder.build('ecommpay/startpayment/embeddedform?action=checkCartAmount&amount=' + paymentPageParams.payment_amount);
                 jQuery.ajax({
                     method: 'POST',
                     url: endpoint,
                     dataType: 'json',
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
-                            if(response.amountIsEqual) {
+                            if (response.amountIsEqual) {
                                 hideOverlayLoader();
                                 component.placeOrder();
                             } else {
@@ -367,7 +371,7 @@ define(
                             alert(response.error);
                         }
                     },
-                    error: function(jqXHR, textStatus, errorThrown) {
+                    error: function (jqXHR, textStatus, errorThrown) {
                         alert(textStatus);
                     }
                 });

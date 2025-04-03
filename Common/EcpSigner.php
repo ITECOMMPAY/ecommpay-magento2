@@ -13,10 +13,40 @@ class EcpSigner
 
     /**
      *
+     * @param array $data
+     * @return bool
+     */
+    public function checkSignature(array $data)
+    {
+        if (!array_key_exists('signature', $data)) {
+            return false;
+        }
+        $signature = $data['signature'];
+        unset($data['signature']);
+
+        return $this->getSignature($data) === $signature;
+    }
+
+    /**
+     *
+     * @param array $data
+     * @param array $ignoredParams
+     * @return string
+     */
+    public function getSignature(array $data, array $ignoredParams = []): string
+    {
+        $paramsToSign = $this->getParamsToSign($data, $ignoredParams);
+        $stringToSign = $this->getStringToSign($paramsToSign);
+        $secretKey = $this->configHelper->getSecretKeyDecrypted();
+        return base64_encode(hash_hmac('sha512', $stringToSign, $secretKey, true));
+    }
+
+    /**
+     *
      * @param array $params
      * @param array $ignoreParamKeys
-     * @param int $currentLevel
      * @param string $prefix
+     * @param bool $sort
      * @return array
      */
     private function getParamsToSign(
@@ -36,7 +66,7 @@ class EcpSigner
             if (in_array($key, $ignoreParamKeys, true)) {
                 continue;
             }
-            $paramKey = ($prefix ? $prefix . ':' : '') . $key;
+            $paramKey = ($prefix ? $prefix . ':' : '') . str_replace(':', '::', $key);
             if (is_array($value)) {
                 $subArray = $this->getParamsToSign($value, $ignoreParamKeys, $paramKey, false);
                 $paramsToSign = array_merge($paramsToSign, $subArray);
@@ -58,39 +88,12 @@ class EcpSigner
 
     /**
      *
-     * @param array $data
-     * @param array $ignoredParams
-     * @return string */
-    public function getSignature(array $data, array $ignoredParams = [])
-    {
-        $paramsToSign = $this->getParamsToSign($data, $ignoredParams);
-        $stringToSign = $this->getStringToSign($paramsToSign);
-        $secretKey = $this->configHelper->getSecretKeyDecrypted();
-        return base64_encode(hash_hmac('sha512', $stringToSign, $secretKey, true));
-    }
-
-    /**
-     *
      * @param array $paramsToSign
-     * @return string */
+     * @return string
+     */
     private function getStringToSign(array $paramsToSign)
     {
         return implode(';', $paramsToSign);
-    }
-
-    /**
-     *
-     * @param array $data
-     * @return bool */
-    public function checkSignature(array $data)
-    {
-        if (!array_key_exists('signature', $data)) {
-            return false;
-        }
-        $signature = $data['signature'];
-        unset($data['signature']);
-
-        return $this->getSignature($data) === $signature;
     }
 
     /**
@@ -98,7 +101,8 @@ class EcpSigner
      * @param array $data
      * @return array
      */
-    public function unsetNullParams(array $data) {
+    public function unsetNullParams(array $data)
+    {
         foreach ($data as $key => $value) {
             switch (true) {
                 case $value === null:

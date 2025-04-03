@@ -22,13 +22,13 @@ class EcpGatewayProcessor
 
     public function __construct(
         Curl $curl,
-        EcpSigner $ecpSigner, 
-        OrderPaymentManager $orderPaymentManager, 
+        EcpSigner $ecpSigner,
+        OrderPaymentManager $orderPaymentManager,
         RequestInterface $request,
         Session $session,
         EcpConfigHelper $configHelper
-    )
-    {
+    ) {
+
         $this->signer = $ecpSigner;
         $this->configHelper = $configHelper;
         $this->httpClient = $curl;
@@ -37,6 +37,9 @@ class EcpGatewayProcessor
         $this->session = $session;
     }
 
+    /**
+     * @throws EcpGateRequestException
+     */
     public function capture(int $orderId, float $amount, string $currency, string $endpoint): EcpGatewayResponse
     {
         $requestBody = $this->getRequestBody($orderId, $amount, $currency);
@@ -44,22 +47,12 @@ class EcpGatewayProcessor
         return $this->handleResponse();
     }
 
-    public function cancel(int $orderId, string $endpoint): EcpGatewayResponse
-    {
-        $requestBody = $this->getRequestBody($orderId);
-        $this->sendRequest($requestBody, $this->configHelper->getGateCancelEndpoint($endpoint));
-        return $this->handleResponse();
-    }
-
-    public function refund(int $orderId, float $amount, string $currency, string $endpoint): EcpGatewayResponse
-    {
-        $requestBody = $this->getRequestBody($orderId, $amount, $currency, true);
-        $this->sendRequest($requestBody, $this->configHelper->getGateRefundEndpoint($endpoint));
-        return $this->handleResponse();
-    }
-
-    private function getRequestBody(int $orderId, ?float $amount = null, ?string $currency = null, bool $isRefund = false): array
-    {
+    private function getRequestBody(
+        int $orderId,
+        ?float $amount = null,
+        ?string $currency = null,
+        bool $isRefund = false
+    ): array {
         $requestBody = [
             'general' => [
                 'project_id' => $this->configHelper->getProjectId(),
@@ -86,6 +79,9 @@ class EcpGatewayProcessor
         $this->httpClient->post($endpoint, json_encode($requestBody));
     }
 
+    /**
+     * @throws EcpGateRequestException
+     */
     private function handleResponse(): EcpGatewayResponse
     {
         $responseBody = $this->httpClient->getBody();
@@ -96,4 +92,23 @@ class EcpGatewayProcessor
         return new EcpGatewayResponse($responseJson);
     }
 
+    /**
+     * @throws EcpGateRequestException
+     */
+    public function cancel(int $orderId, string $endpoint): EcpGatewayResponse
+    {
+        $requestBody = $this->getRequestBody($orderId);
+        $this->sendRequest($requestBody, $this->configHelper->getGateCancelEndpoint($endpoint));
+        return $this->handleResponse();
+    }
+
+    /**
+     * @throws EcpGateRequestException
+     */
+    public function refund(int $orderId, float $amount, string $currency, string $endpoint): EcpGatewayResponse
+    {
+        $requestBody = $this->getRequestBody($orderId, $amount, $currency, true);
+        $this->sendRequest($requestBody, $this->configHelper->getGateRefundEndpoint($endpoint));
+        return $this->handleResponse();
+    }
 }

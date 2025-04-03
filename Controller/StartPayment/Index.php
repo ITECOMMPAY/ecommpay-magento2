@@ -3,12 +3,14 @@
 namespace Ecommpay\Payments\Controller\StartPayment;
 
 use Ecommpay\Payments\Common\RequestBuilder;
+use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Sales\Model\Order;
 
 class Index extends Action
 {
@@ -34,15 +36,15 @@ class Index extends Action
     /**
      * Initialize redirect to bank
      *
-     * @return \Magento\Framework\Controller\ResultInterface
+     * @return ResultInterface
+     * @throws Exception
      */
     public function execute()
     {
-        /** @var \Magento\Sales\Model\Order $order */
         $order = $this->checkoutSession->getLastRealOrder();
 
-        $order->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
-        $order->setStatus(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
+        $order->setState(Order::STATE_PENDING_PAYMENT);
+        $order->setStatus(Order::STATE_PENDING_PAYMENT);
         $order->addStatusToHistory($order->getStatus(), 'The customer opened the payment page. Waiting for the customer to make the payment');
         $order->save();
 
