@@ -2,16 +2,20 @@ define(
     [
         'jquery',
         'Magento_Checkout/js/view/payment/default',
+        'Magento_Checkout/js/model/quote',
         'mage/url',
         'Magento_Ui/js/model/messageList',
         'Magento_Checkout/js/model/full-screen-loader',
+        'Ecommpay_Payments/js/view/payment/helper',
     ],
     function (
         $,
         Component,
+        quote,
         urlBuilder,
         messageList,
-        fullScreenLoader
+        fullScreenLoader,
+        helper
     ) {
         'use strict';
         var CHECK_VALIDATION_POST_MESSAGE = "{\"message\":\"epframe.embedded_mode.check_validation\",\"from_another_domain\":true}";
@@ -294,6 +298,50 @@ define(
         }
 
         return Component.extend({
+            initObservable: function () {
+                this._super();
+
+                let currentBillingPostCode = quote.billingAddress.postcode;
+                let currentBillingStreet = helper.streetArrayToString(quote.billingAddress.street);
+                let currentShippingPostCode = quote.shippingAddress.postcode;
+                let currentShippingStreet = helper.streetArrayToString(quote.shippingAddress.street);
+
+                quote.totals.subscribe(function (totals) {
+                    if (!paymentPageParams)
+                        return;
+                    const currentCartTotal = helper.priceMultiplyByCurrencyCode(totals.grand_total, totals.quote_currency_code);
+                    if (currentCartTotal !== paymentPageParams.payment_amount)
+                        startEmbeddedPayment();
+                }, this);
+
+                quote.billingAddress.subscribe(function (billingAddress) {
+                    if (!paymentPageParams || !billingAddress)
+                        return;
+                    const newPostcode = billingAddress.postcode;
+                    const newStreet = helper.streetArrayToString(billingAddress.street)
+                    if (newPostcode !== currentBillingPostCode || newStreet !== currentBillingStreet)
+                    {
+                        currentBillingPostCode = newPostcode;
+                        currentBillingStreet = newStreet;
+                        startEmbeddedPayment();
+                    }
+                }, this);
+
+                quote.shippingAddress.subscribe(function (shippingAddress) {
+                    if (!paymentPageParams || !shippingAddress)
+                        return;
+                    const newPostcode = shippingAddress.postcode;
+                    const newStreet = helper.streetArrayToString(shippingAddress.street)
+                    if (newPostcode !== currentShippingPostCode || newStreet !== currentShippingStreet)
+                    {
+                        currentShippingPostCode = newPostcode;
+                        currentShippingStreet = newStreet;
+                        startEmbeddedPayment();
+                    }
+                }, this);
+
+                return this;
+            },
             defaults: {
                 template: 'Ecommpay_Payments/payment/ecommpay_card',
                 redirectAfterPlaceOrder: false,
