@@ -301,43 +301,12 @@ define(
             initObservable: function () {
                 this._super();
 
-                let currentBillingPostCode = quote.billingAddress.postcode;
-                let currentBillingStreet = helper.streetArrayToString(quote.billingAddress.street);
-                let currentShippingPostCode = quote.shippingAddress.postcode;
-                let currentShippingStreet = helper.streetArrayToString(quote.shippingAddress.street);
-
                 quote.totals.subscribe(function (totals) {
                     if (!paymentPageParams)
                         return;
                     const currentCartTotal = helper.priceMultiplyByCurrencyCode(totals.grand_total, totals.quote_currency_code);
                     if (currentCartTotal !== paymentPageParams.payment_amount)
                         startEmbeddedPayment();
-                }, this);
-
-                quote.billingAddress.subscribe(function (billingAddress) {
-                    if (!paymentPageParams || !billingAddress)
-                        return;
-                    const newPostcode = billingAddress.postcode;
-                    const newStreet = helper.streetArrayToString(billingAddress.street)
-                    if (newPostcode !== currentBillingPostCode || newStreet !== currentBillingStreet)
-                    {
-                        currentBillingPostCode = newPostcode;
-                        currentBillingStreet = newStreet;
-                        startEmbeddedPayment();
-                    }
-                }, this);
-
-                quote.shippingAddress.subscribe(function (shippingAddress) {
-                    if (!paymentPageParams || !shippingAddress)
-                        return;
-                    const newPostcode = shippingAddress.postcode;
-                    const newStreet = helper.streetArrayToString(shippingAddress.street)
-                    if (newPostcode !== currentShippingPostCode || newStreet !== currentShippingStreet)
-                    {
-                        currentShippingPostCode = newPostcode;
-                        currentShippingStreet = newStreet;
-                        startEmbeddedPayment();
-                    }
                 }, this);
 
                 return this;

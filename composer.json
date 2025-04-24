@@ -6,7 +6,7 @@
     "ext-json": "*"
   },
   "type": "magento2-module",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "license": ["GPL-2.0"],
   "autoload": {
     "files": ["registration.php"],

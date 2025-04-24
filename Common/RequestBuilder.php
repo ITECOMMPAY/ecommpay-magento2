@@ -116,7 +116,7 @@ class RequestBuilder
             'billing_postal' => $postCode,
             'payment_description' => 'Order ID = ' . $order->getIncrementId(),
         ];
-        if ($address !== null && $postCode !== null) {
+        if ($address && $postCode) {
             $result['avs_street_address'] = $address;
             $result['avs_post_code'] = $postCode;
         }
@@ -294,15 +294,6 @@ class RequestBuilder
 
         if ($customerId = $quote->getCustomerId()) {
             $paymentPageParams['customer_id'] = $customerId;
-        }
-
-        if ($billingAddress = $quote->getBillingAddress()) {
-            if ($billingStreet = $billingAddress->getStreet()) {
-                $paymentPageParams['avs_street_address'] = implode(' ', $billingStreet);
-            }
-            if ($billingPostcode = $billingAddress->getPostcode()) {
-                $paymentPageParams['avs_post_code'] = $billingPostcode;
-            }
         }
 
         $paymentPageParams = $this->setCardOperationType($paymentPageParams);
