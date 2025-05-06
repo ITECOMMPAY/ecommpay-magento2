@@ -9,7 +9,6 @@
                 <salt></salt>
                 <testmode>0</testmode>
                 <title>General Settings</title>
-                <payment_action>true</payment_action>
                 <sort_order>1</sort_order>
                 <pp_language>default</pp_language>
                 <additional_parameters></additional_parameters>
@@ -24,7 +23,6 @@
                 <show_description>0</show_description>
                 <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
                 <display_mode>embedded</display_mode>
-                <payment_action>true</payment_action>
                 <model>MethodCard</model>
                 <sort_order>2</sort_order>
                 <force_payment_method>card</force_payment_method>
@@ -49,7 +47,6 @@
                 <title>ApplePay</title>
                 <show_description>1</show_description>
                 <description>Pay with ApplePay</description>
-                <payment_action>true</payment_action>
                 <model>MethodApplePay</model>
                 <sort_order>3</sort_order>
                 <force_payment_method>apple_pay_core</force_payment_method>
@@ -74,7 +71,6 @@
                 <title>GooglePay</title>
                 <show_description>1</show_description>
                 <description>Pay with GooglePay.</description>
-                <payment_action>true</payment_action>
                 <model>MethodGooglePay</model>
                 <sort_order>4</sort_order>
                 <force_payment_method>google_pay_host</force_payment_method>
@@ -99,7 +95,6 @@
                 <title>Pay by bank</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to your bank.</description>
-                <payment_action>true</payment_action>
                 <model>MethodOpenBanking</model>
                 <force_payment_group>openbanking</force_payment_group>
                 <sort_order>5</sort_order>
@@ -123,7 +118,6 @@
                 <title>PayPal</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to PayPal.</description>
-                <payment_action>true</payment_action>
                 <model>MethodPayPal</model>
                 <force_payment_method>paypal-wallet</force_payment_method>
                 <sort_order>6</sort_order>
@@ -148,7 +142,6 @@
                 <title>PayPal Buy Now Pay Later</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to PayPal to finish your operation.</description>
-                <payment_action>true</payment_action>
                 <model>MethodPayPalPayLater</model>
                 <sort_order>7</sort_order>
                 <force_payment_method>paypal-wallet</force_payment_method>
@@ -174,7 +167,6 @@
                 <title>Sofort</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to your bank.</description>
-                <payment_action>true</payment_action>
                 <model>MethodSofort</model>
                 <sort_order>8</sort_order>
                 <force_payment_method>sofort</force_payment_method>
@@ -198,7 +190,6 @@
                 <title>iDEAL</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to iDEAL.</description>
-                <payment_action>true</payment_action>
                 <model>MethodIdeal</model>
                 <sort_order>9</sort_order>
                 <force_payment_method>ideal</force_payment_method>
@@ -223,7 +214,6 @@
                 <title>Klarna</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to Klarna.</description>
-                <payment_action>true</payment_action>
                 <model>MethodKlarna</model>
                 <sort_order>10</sort_order>
                 <force_payment_method>klarna</force_payment_method>
@@ -248,7 +238,6 @@
                 <title>Blik</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to finish your Blik payment.</description>
-                <payment_action>true</payment_action>
                 <model>MethodBlik</model>
                 <sort_order>11</sort_order>
                 <force_payment_method>blik</force_payment_method>
@@ -273,7 +262,6 @@
                 <title>Giropay</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to Giropay.</description>
-                <payment_action>true</payment_action>
                 <model>MethodGiropay</model>
                 <sort_order>12</sort_order>
                 <force_payment_method>giropay</force_payment_method>
@@ -298,7 +286,6 @@
                 <title>Neteller</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
-                <payment_action>true</payment_action>
                 <model>MethodNeteller</model>
                 <sort_order>13</sort_order>
                 <force_payment_method>neteller</force_payment_method>
@@ -322,7 +309,6 @@
                 <title>Skrill</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
-                <payment_action>true</payment_action>
                 <model>MethodSkrill</model>
                 <sort_order>14</sort_order>
                 <force_payment_method>skrill</force_payment_method>
@@ -346,7 +332,6 @@
                 <title>Bancontact</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
-                <payment_action>true</payment_action>
                 <model>MethodBancontact</model>
                 <sort_order>15</sort_order>
                 <force_payment_method>bancontact</force_payment_method>
@@ -371,7 +356,6 @@
                 <title>Multibanco</title>
                 <show_description>1</show_description>
                 <description>You will be redirected to Ecommpay payment page. All data you enter in that page are secured.</description>
-                <payment_action>true</payment_action>
                 <model>MethodMultibanco</model>
                 <sort_order>16</sort_order>
                 <force_payment_method>multibanco</force_payment_method>
@@ -395,7 +379,6 @@
                 <title>More payment methods</title>
                 <show_description>1</show_description>
                 <description>Payment form with additional payment methods.</description>
-                <payment_action>true</payment_action>
                 <model>MethodMoreMethods</model>
                 <sort_order>17</sort_order>
                 <force_payment_method>card</force_payment_method>
