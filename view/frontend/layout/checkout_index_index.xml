@@ -87,5 +87,8 @@
                 </argument>
             </arguments>
         </referenceBlock>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Messages" name="checkout.messages" as="messages" before="-"/>
+        </referenceContainer>
     </body>
 </page>

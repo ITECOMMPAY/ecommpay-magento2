@@ -5,19 +5,23 @@ namespace Ecommpay\Payments\Common;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\UrlInterface;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 class EcpConfigHelper
 {
-    public const PLUGIN_VERSION = '2.1.6';
+    public const PLUGIN_VERSION = '2.2.0';
     public const AUTHORIZE_TYPE = 'authorize';
     public const AUTHORIZE_AND_CAPTURE_TYPE = 'authorize_capture';
     public const TEST_PREFIX = 'test_';
     public const CMS_PREFIX = 'mag_';
     public const PP_LANGUAGE_DEFAULT = 'default';
+    public const DECLINED = 'declined';
 
+    private const DEFAULT_THEME_CHECKOUT_PATH = 'checkout/';
+    private const PAYMENT_FRAGMENT = 'payment';
     private const ECOMMPAY_GATE_PROTOCOL = 'https';
     private const ECOMMPAY_GATE_HOST = 'api.ecommpay.com';
     private const GATE_CAPTURE_ENDPOINT_FORMAT = '%s://%s/v2/payment/%s/capture';
@@ -58,17 +62,19 @@ class EcpConfigHelper
     private EncryptorInterface $encryptor;
     private string $storeScope;
     private StoreManagerInterface $storeManagerInterface;
+    private UrlInterface $urlBuilder;
 
     public function __construct(
         ScopeConfigInterface $scopeConfigInterface,
         StoreManagerInterface $storeManagerInterface,
-        EncryptorInterface $encryptorInterface
-    )
-    {
+        EncryptorInterface $encryptorInterface,
+        UrlInterface $urlBuilder
+    ) {
         $this->scopeConfig = $scopeConfigInterface;
         $this->encryptor = $encryptorInterface;
         $this->storeScope = ScopeInterface::SCOPE_STORE;
         $this->storeManagerInterface = $storeManagerInterface;
+        $this->urlBuilder = $urlBuilder;
     }
 
     public static function priceMultiplyByCurrencyCode($price, $currencyCode): int
@@ -232,5 +238,14 @@ class EcpConfigHelper
     public function getMethodEndPoint(string $code): ?string
     {
         return $this->scopeConfig->getValue('payment/' . $code . '/methodEndpoint', $this->storeScope);
+    }
+
+    public function getReturnChekoutUrl(bool $isDecliend = false): string
+    {
+        $redirectParams = ['_fragment' => self::PAYMENT_FRAGMENT];
+        if ($isDecliend) {
+            $redirectParams['_query'] = [self::DECLINED => 1];
+        }
+        return $this->urlBuilder->getUrl(self::DEFAULT_THEME_CHECKOUT_PATH, $redirectParams);
     }
 }

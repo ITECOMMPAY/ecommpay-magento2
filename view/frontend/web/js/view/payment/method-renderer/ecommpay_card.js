@@ -258,7 +258,7 @@ define(
                     }
                     break;
                 case 'epframe.destroy':
-                    window.location.replace('/ecommpay/endpayment/restorecart');
+                    window.location.replace('/checkout/#payment');
                     break;
             }
         }, false);

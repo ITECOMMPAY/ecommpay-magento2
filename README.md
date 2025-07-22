@@ -82,6 +82,8 @@ General:
 1. Magento >= 2.2
 
 ### Changelog
+#### 2.2.0
+* Feature: Restore the cart if the user returns from the payment page by clicking the back button in the browser
 #### 2.1.0
 * Feature: Enhanced payment flow. We've added a retry feature for failed payments, making it easier for users to complete their purchase.
 #### 2.0.0

@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="payment_method_is_active">
-        <observer name="ecommpay_payments_payment_method_is_active" instance="Ecommpay\Payments\Observer\PaymentMethodIsActiveObserver"/>
+        <observer name="ecommpay_payment_method_is_active" instance="Ecommpay\Payments\Observer\PaymentMethodIsActiveObserver"/>
+    </event>
+    <event name="controller_action_predispatch_checkout_index_index">
+        <observer name="ecommpay_checkout_index_predispatch" instance="Ecommpay\Payments\Observer\CheckoutIndexPredispatchObserver"/>
     </event>
 </config>

@@ -75,15 +75,15 @@ class EmbeddedForm extends Action
             return ['success' => false, 'error' => 'Order not found in session'];
         }
         $this->orderPaymentManager->insert($order->getEntityId(), $paymentId);
-        
+
         $order->setState(Order::STATE_PENDING_PAYMENT);
         $order->setStatus(Order::STATE_PENDING_PAYMENT);
         $order->addStatusToHistory($order->getStatus(), 'The customer made a payment. Waiting for response from payment platform');
         $order->save();
-        
+
         $billingInfo = $this->requestBuilder->getBillingDataFromOrder($order);
         $billingInfo = $this->requestBuilder->signer->unsetNullParams($billingInfo);
-        
+
         return ['success' => true, 'data' => $billingInfo];
     }
 

@@ -8,11 +8,12 @@ use Ecommpay\Payments\Common\CallbackInfoManager;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Magento\Sales\Api\OrderManagementInterface;
-use Magento\Framework\Registry;
-use Magento\Sales\Model\Order;
-use Exception;
+use Magento\Framework\Controller\Result\Json;
+use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\Redirect;
+use Magento\Sales\Api\OrderManagementInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order;
 
 class RestoreCart extends Action
 {
@@ -20,77 +21,88 @@ class RestoreCart extends Action
     private EcpConfigHelper $configHelper;
     private OrderManagementInterface $orderManagement;
     private OrderPaymentManager $orderPaymentManager;
-    private Registry $registry;
-    private Order $order;
+    private OrderRepositoryInterface $orderRepository;
+    private JsonFactory $resultJsonFactory;
     private CallbackInfoManager $callbackInfoManager;
 
-    private const CART_URL = 'checkout/cart';
-    private const DECLINED = 'declined';
-    private const CANCELLED = 'cancelled';
-
     public function __construct(
-        Context $context,
-        Session $checkoutSession,
-        EcpConfigHelper $configHelper,
+        Context                  $context,
+        Session                  $checkoutSession,
+        EcpConfigHelper          $configHelper,
+        JsonFactory              $resultJsonFactory,
         OrderManagementInterface $orderManagement,
-        OrderPaymentManager $orderPaymentManager,
-        Registry $registry,
-        Order $order,
-        CallbackInfoManager $callbackInfoManager
+        OrderPaymentManager      $orderPaymentManager,
+        OrderRepositoryInterface $orderRepository,
+        CallbackInfoManager      $callbackInfoManager
     ) {
         parent::__construct($context);
         $this->checkoutSession = $checkoutSession;
         $this->configHelper = $configHelper;
         $this->orderManagement = $orderManagement;
         $this->orderPaymentManager = $orderPaymentManager;
-        $this->registry = $registry;
-        $this->order = $order;
+        $this->orderRepository = $orderRepository;
+        $this->resultJsonFactory = $resultJsonFactory;
         $this->callbackInfoManager = $callbackInfoManager;
     }
 
     /**
-     * @return Redirect
-     * @throws Exception
+     * Get redirect parameters
+     *
+     * @return Redirect | Json
      */
-    public function execute(): Redirect
+    public function execute()
     {
-        $request = $this->getRequest();
-        $isAjax = $request->isXmlHttpRequest();
-
-        $lastRealOrder = $this->checkoutSession->getLastRealOrder();
-        if ($lastRealOrder->getPayment()) {
-            $failedPaymentAction = $this->configHelper->getFailedPaymentAction();
-
-            if ($failedPaymentAction === EcpConfigHelper::FAILED_PAYMENT_ACTION_DELETE_ORDER) {
-                $this->deleteOrder($lastRealOrder->getId());
-            }
-
-            $this->checkoutSession->restoreQuote();
-
-            if (!$isAjax) {
-                $isCancelled = $request->getParam(self::CANCELLED, 0);
-                $message = sprintf('Payment was %s. You can try another payment method.', $isCancelled ? self::CANCELLED : self::DECLINED);
-                $this->messageManager->addErrorMessage($message);
-            }
+        if (!$order = $this->orderPaymentManager->getLastRealSessionEcommpayOrder()) {
+            return $this->buildRedirectToHomePage();
         }
 
+        if (!$this->orderPaymentManager->isRequiredRestoreQuote($order)) {
+            return $this->buildRedirectToHomePage();
+        }
+
+        $this->deleteOrder($order);
+        $this->checkoutSession->restoreQuote();
+
+        if ($this->isEmbeddedModeRequested()) {
+            return $this->addMessageForEmbeddedModeAndBuildResponse();
+        }
+        return $this->buildRedirectForNonEmbeddedMode();
+    }
+
+    private function deleteOrder(Order $order): void
+    {
+        $failedPaymentAction = $this->configHelper->getFailedPaymentAction();
+        if ($failedPaymentAction !== EcpConfigHelper::FAILED_PAYMENT_ACTION_DELETE_ORDER) {
+            return;
+        }
+
+        $this->orderPaymentManager->deleteOrderAndRelatedData($order->getId());
+    }
+
+    private function isEmbeddedModeRequested(): bool
+    {
+        $request = $this->getRequest();
+        return $request->isXmlHttpRequest();
+    }
+
+    private function addMessageForEmbeddedModeAndBuildResponse(): Json
+    {
+        $message = __('Payment was declined. You can try another payment method.');
+        $this->messageManager->addErrorMessage($message);
+        return $this->resultJsonFactory->create()->setData(['result' => 'OK']);
+    }
+
+    private function buildRedirectForNonEmbeddedMode(): Redirect
+    {
         $resultRedirect = $this->resultRedirectFactory->create();
-        $resultRedirect->setPath(self::CART_URL);
+        $resultRedirect->setUrl($this->configHelper->getReturnChekoutUrl(true));
         return $resultRedirect;
     }
 
-    /**
-     * @param $orderId
-     * @return void
-     * @throws Exception
-     */
-    private function deleteOrder($orderId): void
+    private function buildRedirectToHomePage(): Redirect
     {
-        $this->orderPaymentManager->deleteByOrderId($orderId);
-        $this->callbackInfoManager->deleteByOrderId($orderId);
-        $order = $this->order->load($orderId);
-        $this->registry->register('isSecureArea', true);
-        $order->delete();
-        $this->registry->unregister('isSecureArea');
+        $resultRedirect = $this->resultRedirectFactory->create();
+        $resultRedirect->setPath('/');
+        return $resultRedirect;
     }
 }

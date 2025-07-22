@@ -167,7 +167,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_applepay</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayGooglePayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -185,7 +185,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_googlepay</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayOpenBankingValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -203,7 +203,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_open_banking</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayPayPalValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -221,7 +221,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_paypal</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayPayPalPayLaterValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -239,7 +239,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_paypal_paylater</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpaySofortValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -257,7 +257,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_sofort</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayIdealValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -275,7 +275,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_ideal</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayKlarnaValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -293,7 +293,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_klarna</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayBlikValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -311,7 +311,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_blik</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayGiropayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -329,7 +329,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_giropay</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayNetellerValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -347,7 +347,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_neteller</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpaySkrillValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -365,7 +365,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_skrill</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayBancontactValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -383,7 +383,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_bancontact</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayMultibancoValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -401,7 +401,7 @@
             <argument name="methodCode" xsi:type="string">ecommpay_multibanco</argument>
         </arguments>
     </virtualType>
-    
+
     <virtualType name="EcommpayMoreMethodsValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -419,5 +419,12 @@
             <argument name="methodCode" xsi:type="string">ecommpay_more_methods</argument>
         </arguments>
     </virtualType>
+
+    <type name="Ecommpay\Payments\Common\OrderPaymentManager">
+        <arguments>
+            <argument name="orderRepository" xsi:type="object">Magento\Sales\Api\OrderRepositoryInterface</argument>
+            <argument name="callbackInfoManager" xsi:type="object">Ecommpay\Payments\Common\CallbackInfoManager</argument>
+        </arguments>
+    </type>
 
 </config>

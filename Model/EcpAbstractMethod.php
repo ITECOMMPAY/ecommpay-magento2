@@ -40,8 +40,8 @@ class EcpAbstractMethod extends Adapter
         EcpConfigHelper $config,
         EcpGatewayProcessor $gatewayProcessor,
         TransactionRepositoryInterface $transactionRepository,
-        CommandPoolInterface $commandPool = null,
-        ValidatorPoolInterface $validatorPool = null
+        ?CommandPoolInterface $commandPool = null,
+        ?ValidatorPoolInterface $validatorPool = null
     )
     {
         $this->config = $config;

@@ -5,6 +5,8 @@ namespace Ecommpay\Payments\Common;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\UrlInterface;
 use Magento\Checkout\Model\Session;
 use Magento\Sales\Model\Order;
@@ -13,9 +15,16 @@ class RequestBuilder
 {
     private const SUCCESS_URL = 'checkout/onepage/success';
     private const FAIL_URL = 'ecommpay/endpayment/restorecart';
-    private const RETURN_URL = 'ecommpay/endpayment/restorecart?cancelled=1';
     private const CARD_OPERATION_TYPE_SALE = 'sale';
     private const CARD_OPERATION_TYPE_AUTH = 'auth';
+    private const MODE_PURCHASE = 'purchase';
+    private const MODE_CARD_VERIFY = 'card_verify';
+    private const PAYMENT_METHOD_CARD = 'card';
+    private const TARGET_ELEMENT = 'ecommpay-iframe-embedded';
+    private const FRAME_MODE = 'iframe';
+    private const REDIRECT_MODE_PARENT_PAGE = 'parent_page';
+    private const PAYMENT_METHODS_OPTIONS = '{"additional_data":{"embedded_mode":true}}';
+    private const REDIRECT_ENABLED = 2;
 
     public EcpSigner $signer;
     protected ScopeConfigInterface $scopeConfig;
@@ -27,14 +36,14 @@ class RequestBuilder
     protected OrderPaymentManager $orderPaymentManager;
 
     public function __construct(
-        RequestInterface $request,
-        ScopeConfigInterface $scopeConfig,
-        Session $session,
-        UrlInterface $urlBuilder,
-        EcpSigner $signer,
-        EcpConfigHelper $configHelper,
+        RequestInterface         $request,
+        ScopeConfigInterface     $scopeConfig,
+        Session                  $session,
+        UrlInterface             $urlBuilder,
+        EcpSigner                $signer,
+        EcpConfigHelper          $configHelper,
         ProductMetadataInterface $productMetadata,
-        OrderPaymentManager $orderPaymentManager
+        OrderPaymentManager      $orderPaymentManager
     ) {
         $this->request = $request;
         $this->scopeConfig = $scopeConfig;
@@ -50,14 +59,13 @@ class RequestBuilder
     {
         $paymentId = uniqid(EcpConfigHelper::CMS_PREFIX);
         if ($this->configHelper->isTestMode()) {
-            $paymentIdFormater = new EcpPaymentIdFormatter($this->request);
-            $paymentId = $paymentIdFormater->addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
+            $paymentIdFormatter = new EcpPaymentIdFormatter($this->request);
+            $paymentId = $paymentIdFormatter->addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
         }
+
         $this->orderPaymentManager->insert($order->getEntityId(), $paymentId);
         $paymentPageParams = $this->buildParams($order, $paymentId);
         $paymentPageParams = $this->appendPaymentMethod($paymentPageParams, $order);
-
-        $paymentPageParams = $this->signer->unsetNullParams($paymentPageParams);
 
         $paymentPageParams['signature'] = $this->signer->getSignature($paymentPageParams);
 
@@ -80,22 +88,19 @@ class RequestBuilder
             'payment_currency' => $currencyCode,
             'interface_type' => json_encode($this->configHelper->getInterfaceTypeId()),
             'merchant_success_url' => $this->urlBuilder->getUrl(self::SUCCESS_URL),
-            'merchant_success_enabled' => 2,
+            'merchant_success_enabled' => self::REDIRECT_ENABLED,
             'merchant_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
-            'merchant_fail_enabled' => 2,
+            'merchant_fail_enabled' => self::REDIRECT_ENABLED,
             'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
-            'merchant_return_url' => $this->urlBuilder->getUrl(self::RETURN_URL),
+            'merchant_return_url' => $this->configHelper->getReturnChekoutUrl(),
             '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
             '_magento_version' => $this->magentoVersion,
         ];
 
         $optionalParams = $this->getBillingDataFromOrder($order);
-        $optionalParams = $this->setCardOperationType($optionalParams);
-        $optionalParams = $this->setAdditionalParams($optionalParams);
-        $optionalParams = $this->setPPlanguage($optionalParams);
         $optionalParams['customer_id'] = $order->getCustomerId();
+        $optionalParams = $this->setCommonParams($optionalParams);
 
-        $optionalParams = $this->signer->unsetNullParams($optionalParams);
         return array_merge($baseParams, $optionalParams);
     }
 
@@ -123,6 +128,14 @@ class RequestBuilder
         return $result;
     }
 
+    private function setCommonParams(array $paymentPageParams): array
+    {
+        $paymentPageParams = $this->setCardOperationType($paymentPageParams);
+        $paymentPageParams = $this->setAdditionalParams($paymentPageParams);
+        $paymentPageParams = $this->setPPLanguage($paymentPageParams);
+        return $this->signer->unsetNullParams($paymentPageParams);
+    }
+
     private function setCardOperationType(array $paymentPageParams): array
     {
         $isAuthorizeType = $this->configHelper->getPaymentActionType() === EcpConfigHelper::AUTHORIZE_TYPE;
@@ -141,7 +154,7 @@ class RequestBuilder
         return array_merge($paymentPageParams, $additionalData);
     }
 
-    private function setPPlanguage(array $paymentPageParams): array
+    private function setPPLanguage(array $paymentPageParams): array
     {
         $ppLanguage = $this->configHelper->getPPLanguage();
         if ($ppLanguage !== EcpConfigHelper::PP_LANGUAGE_DEFAULT) {
@@ -195,7 +208,7 @@ class RequestBuilder
         return $urlData;
     }
 
-    private function getReceiptData(Order $order)
+    private function getReceiptData(Order $order): string
     {
         $items = $order->getItems();
         $currency = $order->getOrderCurrency();
@@ -219,7 +232,7 @@ class RequestBuilder
         return base64_encode(json_encode($receipt));
     }
 
-    private function getPositions($items, $currency)
+    private function getPositions($items, $currency): array
     {
         $positions = [];
         foreach ($items as $item) {
@@ -228,7 +241,7 @@ class RequestBuilder
         return $positions;
     }
 
-    private function getReceiptPosition($item, $currency)
+    private function getReceiptPosition($item, $currency): array
     {
         $quantity = abs(!($item->getQtyOrdered() === null) ? $item->getQtyOrdered() : 0);
         $total = abs(!($item->getRowTotal() === null) ? $item->getRowTotal() : 0);
@@ -258,36 +271,40 @@ class RequestBuilder
         return $data;
     }
 
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
     public function getPaymentPageParamsForEmbeddedMode(): array
     {
         $quote = $this->checkoutSession->getQuote();
         $paymentId = uniqid(EcpConfigHelper::CMS_PREFIX);
         if ($this->configHelper->isTestMode()) {
-            $paymentIdFormater = new EcpPaymentIdFormatter($this->request);
-            $paymentId = $paymentIdFormater->addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
+            $paymentIdFormatter = new EcpPaymentIdFormatter($this->request);
+            $paymentId = $paymentIdFormatter->addPaymentPrefix($paymentId, EcpConfigHelper::TEST_PREFIX);
         }
 
         $grandTotal = $quote->getGrandTotal();
         $currencyCode = $quote->getQuoteCurrencyCode();
         $paymentAmount = EcpConfigHelper::priceMultiplyByCurrencyCode($grandTotal, $currencyCode);
         $paymentPageParams = [
-            'mode' => $paymentAmount > 0 ? 'purchase' : 'card_verify',
+            'mode' => $paymentAmount > 0 ? self::MODE_PURCHASE : self::MODE_CARD_VERIFY,
             'payment_amount' => $paymentAmount,
             'payment_currency' => $currencyCode,
             'project_id' => $this->configHelper->getProjectId(),
             'payment_id' => $paymentId,
-            'force_payment_method' => 'card',
-            'target_element' => 'ecommpay-iframe-embedded',
-            'frame_mode' => 'iframe',
+            'force_payment_method' => self::PAYMENT_METHOD_CARD,
+            'target_element' => self::TARGET_ELEMENT,
+            'frame_mode' => self::FRAME_MODE,
             'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
             'interface_type' => json_encode($this->configHelper->getInterfaceTypeId()),
-            'payment_methods_options' => "{\"additional_data\":{\"embedded_mode\":true}}",
+            'payment_methods_options' => self::PAYMENT_METHODS_OPTIONS,
             'redirect_success_url' => $this->urlBuilder->getUrl(self::SUCCESS_URL),
-            'redirect_success_enabled' => 2,
-            'redirect_success_mode' => 'parent_page',
+            'redirect_success_enabled' => self::REDIRECT_ENABLED,
+            'redirect_success_mode' => self::REDIRECT_MODE_PARENT_PAGE,
             'merchant_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
-            'merchant_fail_enabled' => 2,
-            'merchant_fail_redirect_mode' => 'parent_page',
+            'merchant_fail_enabled' => self::REDIRECT_ENABLED,
+            'merchant_fail_redirect_mode' => self::REDIRECT_MODE_PARENT_PAGE,
             '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
             '_magento_version' => $this->magentoVersion,
         ];
@@ -296,14 +313,8 @@ class RequestBuilder
             $paymentPageParams['customer_id'] = $customerId;
         }
 
-        $paymentPageParams = $this->setCardOperationType($paymentPageParams);
-        $paymentPageParams = $this->setAdditionalParams($paymentPageParams);
-        $paymentPageParams = $this->setPPlanguage($paymentPageParams);
-
-        $paymentPageParams = $this->signer->unsetNullParams($paymentPageParams);
-
+        $paymentPageParams = $this->setCommonParams($paymentPageParams);
         $paymentPageParams['signature'] = $this->signer->getSignature($paymentPageParams, ["frame_mode"]);
-
         $paymentPageParams['paymentPageUrl'] = sprintf(
             '%s://%s/payment',
             $this->configHelper->getProtocol(),

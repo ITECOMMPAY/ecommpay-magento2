@@ -20,11 +20,11 @@ class Index extends Action
     protected JsonFactory $resultJsonFactory;
 
     public function __construct(
-        Context $context,
-        Session $checkoutSession,
+        Context        $context,
+        Session        $checkoutSession,
         RequestBuilder $requestBuilder,
-        Http $http,
-        JsonFactory $jsonFactory
+        Http           $http,
+        JsonFactory    $jsonFactory
     ) {
         parent::__construct($context);
         $this->request = $http;
