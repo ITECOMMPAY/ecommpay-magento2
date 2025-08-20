@@ -68,13 +68,7 @@ class RequestBuilder
         $paymentPageParams = $this->appendPaymentMethod($paymentPageParams, $order);
 
         $paymentPageParams['signature'] = $this->signer->getSignature($paymentPageParams);
-
-        $paymentPageParams['paymentPageUrl'] = sprintf(
-            '%s://%s/payment',
-            $this->configHelper->getProtocol(),
-            $this->configHelper->getPPHost()
-        );
-        return $paymentPageParams;
+        return $this->appendSystemUnsignedParams($paymentPageParams);
     }
 
     protected function buildParams(Order $order, string $paymentId): array
@@ -92,9 +86,7 @@ class RequestBuilder
             'merchant_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
             'merchant_fail_enabled' => self::REDIRECT_ENABLED,
             'merchant_callback_url' => $this->configHelper->getMerchantCallbackUrl(),
-            'merchant_return_url' => $this->configHelper->getReturnChekoutUrl(),
-            '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
-            '_magento_version' => $this->magentoVersion,
+            'merchant_return_url' => $this->configHelper->getReturnChekoutUrl()
         ];
 
         $optionalParams = $this->getBillingDataFromOrder($order);
@@ -271,6 +263,20 @@ class RequestBuilder
         return $data;
     }
 
+    private function appendSystemUnsignedParams(array $paymentPageParams): array
+    {
+        $params = [
+            '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
+            '_magento_version' => $this->magentoVersion,
+            'paymentPageUrl' => sprintf(
+                '%s://%s/payment',
+                $this->configHelper->getProtocol(),
+                $this->configHelper->getPPHost()
+            )
+        ];
+        return array_merge($paymentPageParams, $params);
+    }
+
     /**
      * @throws NoSuchEntityException
      * @throws LocalizedException
@@ -305,8 +311,6 @@ class RequestBuilder
             'merchant_fail_url' => $this->urlBuilder->getUrl(self::FAIL_URL),
             'merchant_fail_enabled' => self::REDIRECT_ENABLED,
             'merchant_fail_redirect_mode' => self::REDIRECT_MODE_PARENT_PAGE,
-            '_plugin_version' => EcpConfigHelper::PLUGIN_VERSION,
-            '_magento_version' => $this->magentoVersion,
         ];
 
         if ($customerId = $quote->getCustomerId()) {
@@ -315,12 +319,6 @@ class RequestBuilder
 
         $paymentPageParams = $this->setCommonParams($paymentPageParams);
         $paymentPageParams['signature'] = $this->signer->getSignature($paymentPageParams, ["frame_mode"]);
-        $paymentPageParams['paymentPageUrl'] = sprintf(
-            '%s://%s/payment',
-            $this->configHelper->getProtocol(),
-            $this->configHelper->getPPHost()
-        );
-
-        return $paymentPageParams;
+        return $this->appendSystemUnsignedParams($paymentPageParams);
     }
 }

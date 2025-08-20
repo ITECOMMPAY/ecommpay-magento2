@@ -2,115 +2,53 @@
 
 namespace Ecommpay\Payments\Common;
 
-class EcpSigner
+use ecommpay\SignatureHandler;
+
+class EcpSigner extends SignatureHandler
 {
-    private EcpConfigHelper $configHelper;
+    /**
+     * @var EcpConfigHelper
+     */
+    private $configHelper;
 
     public function __construct(EcpConfigHelper $configHelper)
     {
         $this->configHelper = $configHelper;
+        parent::__construct($configHelper->getSecretKeyDecrypted());
     }
 
-    /**
-     *
-     * @param array $data
-     * @return bool
-     */
-    public function checkSignature(array $data)
+    public function checkSignature(array $data): bool
     {
-        if (!array_key_exists('signature', $data)) {
+        if (!isset($data['signature'])) {
             return false;
         }
+
         $signature = $data['signature'];
         unset($data['signature']);
 
-        return $this->getSignature($data) === $signature;
+        return $this->check($data, $signature);
     }
 
-    /**
-     *
-     * @param array $data
-     * @param array $ignoredParams
-     * @return string
-     */
     public function getSignature(array $data, array $ignoredParams = []): string
     {
-        $paramsToSign = $this->getParamsToSign($data, $ignoredParams);
-        $stringToSign = $this->getStringToSign($paramsToSign);
-        $secretKey = $this->configHelper->getSecretKeyDecrypted();
-        return base64_encode(hash_hmac('sha512', $stringToSign, $secretKey, true));
-    }
-
-    /**
-     *
-     * @param array $params
-     * @param array $ignoreParamKeys
-     * @param string $prefix
-     * @param bool $sort
-     * @return array
-     */
-    private function getParamsToSign(
-        array $params,
-        array $ignoreParamKeys = [],
-        string $prefix = '',
-        bool $sort = true
-    ): array {
-        $paramsToSign = [];
-        foreach ($params as $key => $value) {
-            if (substr($key, 0, 1) === "_") {
-                continue;
-            }
-            if ($value === null) {
-                continue;
-            }
-            if (in_array($key, $ignoreParamKeys, true)) {
-                continue;
-            }
-            $paramKey = ($prefix ? $prefix . ':' : '') . str_replace(':', '::', $key);
-            if (is_array($value)) {
-                $subArray = $this->getParamsToSign($value, $ignoreParamKeys, $paramKey, false);
-                $paramsToSign = array_merge($paramsToSign, $subArray);
-            } else {
-                if (is_bool($value)) {
-                    $value = $value ? '1' : '0';
-                } else {
-                    $value = (string)$value;
-                }
-                $paramsToSign[$paramKey] = $paramKey . ':' . $value;
+        foreach ($data as $key => $_) {
+            if (in_array($key, $ignoredParams, true)) {
+                unset($data[$key]);
             }
         }
 
-        if ($sort) {
-            ksort($paramsToSign, SORT_NATURAL);
-        }
-        return $paramsToSign;
+        return $this->sign($data);
     }
 
-    /**
-     *
-     * @param array $paramsToSign
-     * @return string
-     */
-    private function getStringToSign(array $paramsToSign)
-    {
-        return implode(';', $paramsToSign);
-    }
 
-    /**
-     * Unset null parameters
-     * @param array $data
-     * @return array
-     */
-    public function unsetNullParams(array $data)
+    public function unsetNullParams(array $data): array
     {
         foreach ($data as $key => $value) {
-            switch (true) {
-                case $value === null:
-                case is_string($value) && strlen(trim($value)) <= 0:
-                    unset($data[$key]);
-                    break;
+            if ($value === null || (is_string($value) && trim($value) === '')) {
+                unset($data[$key]);
             }
         }
+
         return $data;
     }
 }

@@ -82,6 +82,8 @@ General:
 1. Magento >= 2.2
 
 ### Changelog
+#### 2.2.1
+* Security improvements
 #### 2.2.0
 * Feature: Restore the cart if the user returns from the payment page by clicking the back button in the browser
 #### 2.1.0

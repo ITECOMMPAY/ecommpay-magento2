@@ -3,14 +3,21 @@
   "description": "Ecommpay official plugin for Magento2",
   "require": {
     "php": ">=7.1",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ecommpay/paymentpage-sdk": "^1.5"
   },
   "type": "magento2-module",
-  "version": "2.2.0",
-  "license": ["GPL-2.0"],
+  "version": "2.2.1",
+  "license": [
+    "GPL-2.0"
+  ],
   "autoload": {
-    "files": ["registration.php"],
-    "psr-4": {"Ecommpay\\Payments\\": ""}
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Ecommpay\\Payments\\": ""
+    }
   },
   "repositories": [
     {

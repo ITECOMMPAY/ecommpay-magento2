@@ -12,7 +12,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class EcpConfigHelper
 {
-    public const PLUGIN_VERSION = '2.2.0';
+    public const PLUGIN_VERSION = '2.2.1';
     public const AUTHORIZE_TYPE = 'authorize';
     public const AUTHORIZE_AND_CAPTURE_TYPE = 'authorize_capture';
     public const TEST_PREFIX = 'test_';
@@ -171,6 +171,9 @@ class EcpConfigHelper
 
     public function getMerchantCallbackUrl(): string
     {
+        if ($debugCallbackUrl = getenv('ECOMMPAY_CALLBACK_URL')) {
+            return $debugCallbackUrl;
+        }
         $store = $this->storeManagerInterface->getStore();
         $baseUrl = $store->getBaseUrl();
         if ($this->getProtocol() === "http") {
